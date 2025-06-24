@@ -1,52 +1,139 @@
-# 📚 Index of Interview Questions - ASP.NET Core
+# 📚 ASP.NET Core Interview Questions – Full Index
 
-## 🧭 Quick Navigation
+---
 
-1. [Explain how routing works in ASP.NET Core](#-1-explain-how-routing-works-in-aspnet-core)
-2. [What is Middleware and in What Order Do They Execute?](#-2-what-is-middleware-and-in-what-order-do-they-execute)
-3. [How Can You Stop Other Middlewares from Executing?](#-3-how-can-you-stop-other-middlewares-from-executing)
-4. [What Is the Difference Between MVC and Razor Pages?](#-4-what-is-the-difference-between-mvc-and-razor-pages)
-5. [Name 3 Ways to Create Middleware in ASP.NET Core](#-5-name-3-ways-to-create-middleware-in-aspnet-core)
-6. [Explain How `appsettings.json` Configuration Layering Works](#-6-explain-how-appsettingsjson-configuration-layering-works)
-7. [What Is the Difference Between Singleton, Scoped, and Transient Services?](#-7-what-is-the-difference-between-singleton-scoped-and-transient-services)
-8. [How to Use a Scoped Service Inside a Singleton Service in ASP.NET Core?](#-8-how-to-use-a-scoped-service-inside-a-singleton-service-in-aspnet-core)
-9. [How to Execute Code When the Application Is Starting and Stopping?](#-9-how-to-execute-code-when-the-application-is-starting-and-stopping)
-10. [What Is a Background Service in ASP.NET Core?](#-10-what-is-a-background-service-in-aspnet-core)
-11. [Name a Few Ways to Read Data from `appsettings.json` Configuration](#-11-name-a-few-ways-to-read-data-from-appsettingsjson-configuration)
-12. [What Is the Options Pattern in ASP.NET Core?](#-12-what-is-the-options-pattern-in-aspnet-core)
-13. [Name the Use Cases for `IOptionsSnapshot` and `IOptionsMonitor`](#-13-name-the-use-cases-for-ioptionssnapshot-and-ioptionsmonitor)
-14. [How to Validate Configuration in ASP.NET Core?](#-14-how-to-validate-configuration-in-aspnet-core)
-15. [What Is the Difference Between DataAnnotations and FluentValidation?](#-15-what-is-the-difference-between-dataannotations-and-fluentvalidation)
-16. [What Are the Controller Filter Attributes in ASP.NET Core?](#-16-what-are-the-controller-filter-attributes-in-aspnet-core)
-17. [Why Are Minimal APIs Faster Than Controllers in ASP.NET Core?](#-17-why-are-minimal-apis-faster-than-controllers-in-aspnet-core)
-18. [How to Add Authorization to an ASP.NET Core Project?](#-18-how-to-add-authorization-to-an-aspnet-core-project)
-19. [How to Add Authorization to All Controller's Methods Except One?](#-19-how-to-add-authorization-to-all-controllers-methods-except-one)
-20. [How Would You Implement Log-In Functionality in ASP.NET Core?](#-20-how-would-you-implement-log-in-functionality-in-aspnet-core)
-21. [Explain How JWT Tokens Work](#-21-explain-how-jwt-tokens-work)
-22. [Explain Refresh Tokens and How They Work](#-22-explain-refresh-tokens-and-how-they-work)
-23. [How Would You Implement an Application That Allows Access to Certain Resources If a User Has Specific Permissions?](#-23-how-would-you-implement-an-application-that-allows-access-to-certain-resources-if-a-user-has-specific-permissions)
-24. [What Is `HostedService` Used For in ASP.NET Core?](#-24-what-is-hostedservice-used-for-in-aspnet-core)
-25. [Explain the Difference Between `PeriodicTimer` and `await Task.Delay()`](#-25-explain-the-difference-between-periodictimer-and-await-taskdelay)
-26. [What Is HSTS?](#-26-what-is-hsts)
-27. [How to Return a File from an API Endpoint in ASP.NET Core?](#-27-how-to-return-a-file-from-an-api-endpoint-in-aspnet-core)
-28. [How to Accept a File via an API Endpoint in ASP.NET Core?](#-28-how-to-accept-a-file-via-an-api-endpoint-in-aspnet-core)
-29. [How to Access Query String Parameters in an API Endpoint?](#-29-how-to-access-query-string-parameters-in-an-api-endpoint)
-30. [How to Get Current Logged-In User Information in ASP.NET Core?](#-30-how-to-get-current-logged-in-user-information-in-aspnet-core)
-31. [How to Inject Dependencies in Minimal APIs in ASP.NET Core?](#-31-how-to-inject-dependencies-in-minimal-apis-in-aspnet-core)
-32. [How Would You Structure Your Minimal API Endpoints?](#-32-how-would-you-structure-your-minimal-api-endpoints)
-33. [What Is Output Caching in ASP.NET Core?](#-33-what-is-output-caching-in-aspnet-core)
-34. [Difference Between `IMemoryCache` and `IDistributedCache` in ASP.NET Core](#-34-difference-between-imemorycache-and-idistributedcache-in-aspnet-core)
-35. [Explain How HybridCache / FusionCache Works](#-35-explain-how-hybridcache--fusioncache-works)
-36. [What Caching Patterns Do You Know?](#-36-what-caching-patterns-do-you-know)
-37. [What Is Rate Limiting Used For and What Types Do You Know?](#-37-what-is-rate-limiting-used-for-and-what-types-do-you-know)
-38. [How to Invalidate Data in `OutputCache` (ASP.NET Core)?](#-38-how-to-invalidate-data-in-outputcache-aspnet-core)
-39. [How to Implement API Versioning in ASP.NET Core?](#-39-how-to-implement-api-versioning-in-aspnet-core)
-40. [How to Add API Versioning Without Changing the URL?](#-40-how-to-add-api-versioning-without-changing-the-url)
-41. [What Is Swagger Used For?](#-41-what-is-swagger-used-for)
-42. [How to Add Documentation of Endpoints, Models and Fields in Swagger?](#-42-how-to-add-documentation-of-endpoints-models-and-fields-in-swagger)
-43. [How to Get a Connection String from Configuration?](#-43-how-to-get-a-connection-string-from-configuration)
-44. [How Can You Deploy an ASP.NET Core Application?](#-44-how-can-you-deploy-an-aspnet-core-application)
-45. [How to Configure Logging in ASP.NET Core?](#-45-how-to-configure-logging-in-aspnet-core)
+## ⚙️ Fundamentals & Middleware
+
+1. [How routing works in ASP.NET Core](#1-how-routing-works-in-aspnet-core)
+2. [What is middleware and in what order do they execute?](#2-what-is-middleware-and-in-what-order-do-they-execute)
+3. [How can you stop other middlewares from executing?](#3-how-can-you-stop-other-middlewares-from-executing)
+4. [MVC vs Razor Pages](#4-what-is-the-difference-between-mvc-and-razor-pages)
+5. [Ways to create middleware](#5-name-3-ways-to-create-middleware)
+6. [How `appsettings.json` layering works](#6-explain-how-appsettingsjson-configuration-layering-works)
+7. [Singleton vs Scoped vs Transient](#7-what-is-the-diff-between-singleton-scoped-transient-services)
+8. [Using Scoped service inside Singleton](#8-how-to-use-scoped-service-inside-a-singleton-service)
+9. [Code on application start and stop](#9-how-to-execute-code-when-application-is-starting-and-stopping)
+10. [What is a BackgroundService?](#10-what-is-background-service)
+
+---
+
+## ⚙️ Configuration & Options
+
+11. [Ways to read data from `appsettings.json`](#11-name-a-few-ways-to-read-data-from-appsettingsjson-configuration)
+12. [What is the Options Pattern?](#12-what-is-the-options-pattern)
+13. [Use cases for IOptionsMonitor and IOptionsSnapshot](#13-name-the-use-cases-for-using-isnapshotmonitor-and-ioptionsmonitor)
+14. [How to validate configuration](#14-how-to-validate-configuration)
+15. [DataAnnotations vs FluentValidation](#15-what-is-the-difference-between-dataannotations-and-fluentvalidation)
+16. [Controller filter attributes](#16-what-are-the-controller-filter-attributes)
+17. [Why Minimal APIs are faster than controllers](#17-why-minimal-apis-are-faster-than-controllers)
+18. [How to add authorization to a project](#18-how-to-add-authorization-to-the-project)
+19. [How to authorize all methods except one](#19-how-to-add-authorization-to-all-controllers-methods-except-one)
+20. [Implementing login functionality](#20-how-would-you-implement-log-in-functionality)
+
+---
+
+## 🔐 Security
+
+21. [How JWT tokens work](#21-explain-how-jwt-tokens-work)
+22. [What are refresh tokens?](#22-explain-refresh-tokens-and-how-they-work)
+23. [Authorize based on custom permissions](#23-how-would-you-implement-an-application-that-allows-access-to-certain-resources-if-a-user-has-specific-permissions)
+24. [What is HostedService used for?](#24-what-is-hostedservice-used-for)
+25. [PeriodicTimer vs `await Task.Delay()`](#25-explain-the-difference-between-periodictimer-and-await-taskdelay)
+26. [What is HSTS?](#26-what-is-hsts)
+27. [How to return a file from an endpoint](#27-how-to-return-a-file-from-api-endpoint)
+28. [How to accept a file in an endpoint](#28-how-to-accept-the-file-by-api-endpoint)
+29. [Access query string parameters](#29-how-to-access-query-string-parameters-in-api-endpoint)
+30. [Get current logged-in user info](#30-how-to-get-current-logged-in-user-information)
+
+---
+
+## 🧩 Minimal APIs
+
+31. [Dependency injection in Minimal APIs](#31-how-to-inject-dependencies-in-minimal-apis)
+32. [How to structure Minimal API endpoints](#32-how-would-you-structure-your-minimal-api-endpoints)
+
+---
+
+## 🚀 Caching & Rate Limiting
+
+33. [What is output caching?](#33-what-is-output-caching)
+34. [IMemoryCache vs IDistributedCache](#34-difference-between-imemorycache-and-idistributedcache)
+35. [How HybridCache/FusionCache works](#35-explain-how-hybridcachefusioncache-works)
+36. [Caching patterns](#36-what-caching-patterns-do-you-know)
+37. [Rate limiting types and usage](#37-what-is-rate-limiting-used-for-and-what-types-do-you-know)
+38. [How to invalidate OutputCache](#38-how-to-invalidate-data-in-outputcache)
+
+---
+
+## 📦 API Versioning & Documentation
+
+39. [Implement API versioning](#39-how-to-implement-api-versioning)
+40. [Versioning without changing URLs](#40-how-to-add-api-versioning-to-the-existing-api-if-youre-not-allowed-to-change-the-api-urls)
+41. [What is Swagger used for?](#41-what-is-swagger-used-for)
+42. [Add documentation to Swagger](#42-how-to-add-documentation-of-endpoints-models-and-fields-in-swagger)
+43. [Get connection string from config](#43-how-to-get-a-connection-string-from-the-configuration)
+44. [How to deploy ASP.NET Core app](#44-how-can-you-deploy-asp-net-core-application)
+45. [Configure logging](#45-how-to-configure-logging-in-asp-net-core)
+
+---
+
+## 🔐 Extra Security Questions
+
+46. [What are anti-forgery tokens?](#46-what-are-anti-forgery-tokens-and-how-do-they-work)
+47. [Prevent overposting / mass assignment](#47-how-do-you-prevent-overposting-or-mass-assignment-in-aspnet-core)
+48. [Secure sensitive configuration](#48-how-do-you-secure-sensitive-configuration-eg-secrets-connection-strings)
+49. [Authentication vs Authorization](#49-whats-the-difference-between-authentication-and-authorization)
+50. [What is IdentityServer and when to use it?](#50-what-is-identityserver-and-when-should-you-use-it)
+
+---
+
+## 🧱 Architecture & Design
+
+51. [What is Clean Architecture?](#51-what-is-clean-architecture-and-how-would-you-implement-it-in-aspnet-core)
+52. [Repository Pattern (pros/cons)](#52-what-is-the-repository-pattern-and-what-are-its-proscons)
+53. [How to structure a microservice](#53-how-would-you-structure-a-microservice-using-aspnet-core)
+54. [CQRS vs CRUD](#54-explain-the-difference-between-cqrs-and-crud-approaches)
+55. [Mediator pattern with MediatR](#55-what-is-the-mediator-pattern-and-how-is-mediatr-used-in-aspnet-core)
+
+---
+
+## 💾 Entity Framework Core
+
+56. [`Add-Migration` vs `Update-Database`](#56-what-is-the-difference-between-add-migration-and-update-database)
+57. [Concurrency handling](#57-how-do-you-handle-concurrency-in-ef-core)
+58. [`Include`, `ThenInclude`, Lazy Loading](#58-what-are-include-theninclude-and-lazy-loading)
+59. [Seeding initial data](#59-how-do-you-seed-initial-data-in-ef-core)
+60. [Splitting large DbContexts](#60-how-do-you-manage-large-database-schemas-splitting-dbcontexts)
+
+---
+
+## ⚙️ Performance and Optimization
+
+61. [Diagnose slow APIs](#61-how-do-you-diagnose-a-slow-api-in-production)
+62. [`IAsyncEnumerable` for streaming](#62-how-do-you-use-iasyncenumerable-in-aspnet-core-for-streaming)
+63. [Enable response compression](#63-what-is-response-compression-and-how-do-you-enable-it)
+64. [`Span<T>` vs `Memory<T>`](#64-when-and-how-do-you-use-spant-or-memoryt-in-net)
+65. [`IEnumerable`, `IQueryable`, `AsNoTracking`](#65-what-are-the-differences-between-ienumerable-iqueryable-and-asnotracking)
+
+---
+
+## 🧪 Testing & CI/CD
+
+66. [Mocking `HttpClient`](#66-how-do-you-mock-httpclient-in-unit-tests)
+67. [`WebApplicationFactory` for integration tests](#67-what-is-webapplicationfactory-and-how-do-you-use-it-in-integration-tests)
+68. [Test JWT-based auth](#68-how-would-you-test-a-controller-with-jwt-based-auth)
+69. [CI/CD with GitHub Actions / Azure DevOps](#69-how-do-you-set-up-cicd-for-aspnet-core-on-github-actions-or-azure-devops)
+70. [What is Testcontainers](#70-what-is-testcontainers-and-how-is-it-useful-in-net-testing)
+
+---
+
+## 🧑‍🔧 Miscellaneous
+
+71. [How Kestrel works and is configured](#71-how-does-kestrel-work-and-how-do-you-configure-it)
+72. [`IHostedService` vs `BackgroundService` vs `IAsyncDisposable`](#72-difference-between-ihostedservice-backgroundservice-and-iasyncdisposable)
+73. [Minimal APIs vs MVC Controllers](#73-how-do-minimal-apis-compare-to-traditional-mvc-controllers)
+74. [Value Objects vs Entities](#74-what-are-value-objects-and-entities-in-ddd-and-how-do-you-implement-them-in-c)
+75. [`HttpContext.Items` usage](#75-whats-the-role-of-httpcontextitems-and-when-should-you-use-it)
 
 ---
 
@@ -6090,7 +6177,1574 @@ info: UserService[0]
 
 ---
 
+# ✅ 46. What are Anti-Forgery Tokens and How Do They Work?
 
+## 🧠 What Are They?
+
+**Anti-forgery tokens** (a.k.a. CSRF tokens) are used to protect against **Cross-Site Request Forgery (CSRF)** attacks — where a malicious site causes a user’s browser to perform an unintended action on a different site where the user is authenticated.
+
+---
+
+## 🧱 How They Work in ASP.NET Core
+
+1. The server generates a **random token** and embeds it in the HTML form.
+2. It also stores a copy of the token (usually in a cookie or session).
+3. When the form is submitted, the browser sends:
+
+   * The **token** from the form (as hidden input)
+   * The **cookie** or header token
+4. The server verifies that both match and are valid.
+
+---
+
+## 🛡️ Example
+
+### 🔐 Razor View:
+
+```html
+<form method="post">
+    @Html.AntiForgeryToken()
+    <input type="text" name="Name" />
+    <button type="submit">Submit</button>
+</form>
+```
+
+### 🧱 Controller:
+
+```csharp
+[HttpPost]
+[ValidateAntiForgeryToken]
+public IActionResult SubmitForm(MyModel model) { ... }
+```
+
+---
+
+## 🧪 In JavaScript-based Apps
+
+You can manually send the token using headers:
+
+```javascript
+fetch('/api/form', {
+  method: 'POST',
+  headers: {
+    'RequestVerificationToken': token
+  },
+  body: JSON.stringify(data)
+});
+```
+
+ASP.NET Core will validate it server-side if you decorate the action with `[ValidateAntiForgeryToken]`.
+
+---
+
+## ✅ Summary
+
+| Part                         | Function                          |
+| ---------------------------- | --------------------------------- |
+| `@Html.AntiForgeryToken()`   | Generates and embeds the token    |
+| `[ValidateAntiForgeryToken]` | Validates the incoming token      |
+| Protects against             | CSRF (Cross-Site Request Forgery) |
+
+---
+
+# ✅ 47. How Do You Prevent Overposting or Mass Assignment in ASP.NET Core?
+
+## 🧠 Problem
+
+**Overposting** occurs when a user sends extra fields in a request that unintentionally (or maliciously) get bound to a model — modifying data that shouldn't be modifiable.
+
+---
+
+## ⚠️ Example of a Vulnerability
+
+```csharp
+[HttpPost]
+public IActionResult UpdateUser(User user)
+{
+    _db.Users.Update(user);
+    _db.SaveChanges();
+}
+```
+
+If the user sends `{ "Id": 1, "IsAdmin": true }`, they could **escalate privileges**.
+
+---
+
+## ✅ Solution 1: Use a DTO
+
+Only expose the properties you want to update:
+
+```csharp
+public class UpdateUserDto
+{
+    public string FullName { get; set; }
+}
+```
+
+```csharp
+[HttpPost]
+public IActionResult UpdateUser(int id, UpdateUserDto dto)
+{
+    var user = _db.Users.Find(id);
+    user.FullName = dto.FullName;
+    _db.SaveChanges();
+}
+```
+
+---
+
+## ✅ Solution 2: Use `TryUpdateModelAsync`
+
+In Razor Pages:
+
+```csharp
+await TryUpdateModelAsync(user, prefix: "", includeExpressions: u => u.FullName);
+```
+
+---
+
+## ✅ Summary
+
+| Technique                 | How It Helps                      |
+| ------------------------- | --------------------------------- |
+| Use DTOs                  | Prevents binding sensitive fields |
+| Use `Bind`                | Restricts bound properties        |
+| Use `TryUpdateModelAsync` | Explicitly lists updatable fields |
+
+---
+
+# ✅ 48. How Do You Secure Sensitive Configuration (e.g., Secrets, Connection Strings)?
+
+## 🧱 Typical Sensitive Values
+
+* Connection strings
+* API keys
+* JWT secrets
+* Stripe keys
+* SMTP credentials
+
+---
+
+## 🔐 Recommended Methods
+
+### ✅ 1. Use **User Secrets** (Development only)
+
+```bash
+dotnet user-secrets init
+dotnet user-secrets set "JwtSettings:Key" "my_super_secret_key"
+```
+
+In code:
+
+```csharp
+builder.Configuration["JwtSettings:Key"]
+```
+
+---
+
+### ✅ 2. Use **Environment Variables** (Dev/Staging/Production)
+
+In Azure or Linux:
+
+```bash
+export JwtSettings__Key="my_production_key"
+```
+
+---
+
+### ✅ 3. Use **Azure Key Vault** or AWS/GCP Secret Managers
+
+* Centralized secret storage
+* Supports RBAC, audit logs, rotation
+
+```bash
+az keyvault secret set --vault-name myvault --name "JwtKey" --value "super-secret"
+```
+
+In code: Use `AddAzureKeyVault()` with credentials.
+
+---
+
+### ✅ 4. Never Commit Secrets to Git
+
+Use `.gitignore`, `dotnet user-secrets`, or `.env` files.
+
+---
+
+## ✅ Summary
+
+| Environment    | Preferred Method           |
+| -------------- | -------------------------- |
+| Local Dev      | User Secrets               |
+| CI/CD / Server | Environment Variables      |
+| Enterprise     | Azure Key Vault or similar |
+
+---
+
+# ✅ 49. What’s the Difference Between Authentication and Authorization?
+
+| Concept            | Description                                  |
+| ------------------ | -------------------------------------------- |
+| **Authentication** | Verifies **who** you are (identity)          |
+| **Authorization**  | Determines **what** you can do (permissions) |
+
+---
+
+## 🔐 Authentication
+
+* Validates user credentials (email/password, token, OAuth)
+* Creates a **ClaimsPrincipal**
+* Implemented via: `AddAuthentication()`, JWT, cookies, etc.
+
+```csharp
+services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(...);
+```
+
+---
+
+## 🔐 Authorization
+
+* Based on **claims, roles, or policies**
+* Controls access to endpoints
+
+```csharp
+[Authorize(Roles = "Admin")]
+public IActionResult AdminOnly() { ... }
+```
+
+---
+
+## ✅ Summary
+
+| Aspect         | Authentication        | Authorization            |
+| -------------- | --------------------- | ------------------------ |
+| Checks         | Who the user is       | What the user can access |
+| Involves       | Identity verification | Roles, claims, policies  |
+| Happens first? | ✅ Yes                 | After authentication     |
+
+---
+
+# ✅ 50. What Is IdentityServer and When Should You Use It?
+
+## 🧠 What Is IdentityServer?
+
+[IdentityServer](https://identityserver.io/) is an **OpenID Connect and OAuth 2.0 framework for ASP.NET Core**.
+
+It helps you **centralize authentication and authorization** in **multi-application ecosystems**.
+
+---
+
+## 🔐 What It Provides
+
+* Login UI and token endpoints
+* OAuth2 and OpenID Connect support
+* External login (Google, Microsoft, etc.)
+* Token issuance (JWT)
+* Consent screens, scopes, claims, etc.
+
+---
+
+## 🔧 Use Cases
+
+| Use Case                      | Why IdentityServer?                          |
+| ----------------------------- | -------------------------------------------- |
+| ✅ Multiple APIs and Clients   | Centralized auth and token issuance          |
+| ✅ Microservices               | Use JWT issued by IdentityServer across apps |
+| ✅ External Identity Providers | Federate logins (Google, Facebook...)        |
+| ✅ SaaS Platforms              | Multitenancy, custom user flows              |
+
+---
+
+## 📦 When NOT to Use It?
+
+* For **simple monoliths** — prefer **ASP.NET Core Identity + JWT**.
+* When you don’t need OAuth/OIDC.
+
+---
+
+## ✅ Summary
+
+| Feature        | IdentityServer Role                |
+| -------------- | ---------------------------------- |
+| Token Issuance | ✅ Supports OAuth2 / OpenID Connect |
+| Central Auth   | ✅ Central login & token validation |
+| Custom Flows   | ✅ Extensible user login & claims   |
+
+> 🧠 In .NET 7+, IdentityServer is commercial via **Duende IdentityServer**. Free for dev/learning.
+
+---
+
+# ✅ 51. What is Clean Architecture and How Would You Implement It in ASP.NET Core?
+
+## 🧠 Concept
+
+**Clean Architecture** is a software design approach that separates **concerns** into well-defined layers. It promotes:
+
+* **Independence of frameworks**
+* **Testability**
+* **Separation of business logic and infrastructure**
+* **Dependency Rule**: outer layers depend on inner layers, never the reverse
+
+---
+
+## 🏛️ Typical Layer Structure
+
+```plaintext
+[Presentation] -> [Application] -> [Domain] <- [Infrastructure]
+```
+
+| Layer              | Responsibility                             |
+| ------------------ | ------------------------------------------ |
+| **Domain**         | Business rules, Entities, Value Objects    |
+| **Application**    | Use Cases, Interfaces, CQRS Handlers, DTOs |
+| **Infrastructure** | Database, Filesystem, Email, Auth, etc.    |
+| **Presentation**   | API Controllers, Minimal APIs, UI          |
+
+---
+
+## 📦 Example Folder Structure
+
+```
+/src
+  /DogWalk.Domain
+  /DogWalk.Application
+  /DogWalk.Infrastructure
+  /DogWalk.API (or /Presentation)
+```
+
+---
+
+## 🔁 Dependency Injection Rule
+
+Use interfaces in `Application` and implement them in `Infrastructure`.
+
+```csharp
+// Application
+public interface IUserRepository
+{
+    Task<User?> GetByEmailAsync(string email);
+}
+
+// Infrastructure
+public class UserRepository : IUserRepository
+{
+    // EF Core DbContext logic here
+}
+```
+
+Register in `Program.cs`:
+
+```csharp
+services.AddScoped<IUserRepository, UserRepository>();
+```
+
+---
+
+## ✅ Benefits
+
+* Business rules are **isolated**
+* Easy to unit test
+* Framework-agnostic
+* Easier to evolve and maintain
+
+---
+
+# ✅ 52. What is the Repository Pattern and What Are Its Pros/Cons?
+
+## 🧠 Concept
+
+The **Repository Pattern** abstracts data access logic behind a **clean interface**, promoting **separation of concerns** between the domain and data layers.
+
+---
+
+## ✏️ Example
+
+```csharp
+public interface IProductRepository
+{
+    Task<Product?> GetByIdAsync(Guid id);
+    Task AddAsync(Product product);
+}
+```
+
+```csharp
+public class ProductRepository : IProductRepository
+{
+    private readonly AppDbContext _context;
+    public async Task<Product?> GetByIdAsync(Guid id) =>
+        await _context.Products.FindAsync(id);
+}
+```
+
+---
+
+## ✅ Pros
+
+* Decouples data access from business logic
+* Makes code more testable (easy to mock)
+* Easier to swap persistence layer (EF Core, Dapper...)
+
+---
+
+## ❌ Cons
+
+* Adds **complexity** for simple CRUD
+* Risks of becoming an **anemic layer** (just forwarding to EF)
+* May duplicate EF capabilities unnecessarily
+
+> 🧠 EF Core already acts like a unit of work + repository. So use this pattern mainly if you're doing **DDD**, **Clean Architecture**, or need to **abstract data sources**.
+
+---
+
+# ✅ 53. How Would You Structure a Microservice Using ASP.NET Core?
+
+## 🧱 Key Principles
+
+* **Single bounded context**
+* Own **DB**, **auth**, and **deployment**
+* Exposes functionality via **REST, gRPC, or messaging**
+* Focused, independent, replaceable
+
+---
+
+## 📦 Example Project Layout
+
+```
+/src
+  /Catalog.API
+  /Catalog.Application
+  /Catalog.Domain
+  /Catalog.Infrastructure
+/tests
+  /Catalog.Tests
+```
+
+---
+
+## 🧩 Components
+
+| Component         | Example                                 |
+| ----------------- | --------------------------------------- |
+| API Layer         | ASP.NET Core Minimal API or Controllers |
+| Application Layer | Use Cases, DTOs, MediatR                |
+| Domain Layer      | Entities, Enums, Value Objects          |
+| Infrastructure    | SQL Server, RabbitMQ, Stripe, etc.      |
+| Communication     | REST, gRPC, Message Bus                 |
+| Auth              | JWT, IdentityServer, OAuth2             |
+
+---
+
+## 🚀 Tech Examples
+
+* DB: PostgreSQL / MongoDB
+* Messaging: RabbitMQ / Kafka
+* CI/CD: GitHub Actions, Docker
+* Observability: OpenTelemetry, Serilog
+
+---
+
+## 🧪 API Example
+
+```csharp
+app.MapGet("/products/{id}", async (Guid id, IProductService svc) =>
+    Results.Ok(await svc.GetByIdAsync(id)));
+```
+
+---
+
+# ✅ 54. Explain the Difference Between CQRS and CRUD Approaches
+
+## 📦 CRUD
+
+Traditional approach where:
+
+* Same model handles **read & write**
+* Same service/controller deals with all logic
+
+```csharp
+GET /products/1
+POST /products
+PUT /products/1
+```
+
+---
+
+## ⚡ CQRS (Command Query Responsibility Segregation)
+
+Splits **read** and **write** responsibilities:
+
+| Command (Write)     | Query (Read)          |
+| ------------------- | --------------------- |
+| `AddProductCommand` | `GetProductByIdQuery` |
+| Uses DTOs           | Uses DTOs             |
+| Can mutate state    | No side effects       |
+
+---
+
+## 🔧 Benefits of CQRS
+
+* Clean separation of **read vs write**
+* Different models for performance (e.g. projections)
+* Enables **event sourcing** and **scaling reads**
+
+---
+
+## ❗ Trade-offs
+
+* More code / complexity
+* Not always needed for simple apps
+
+---
+
+## 📦 Example with MediatR
+
+```csharp
+public record GetProductByIdQuery(Guid Id) : IRequest<ProductDto>;
+
+public class GetProductByIdHandler : IRequestHandler<GetProductByIdQuery, ProductDto>
+{
+    public async Task<ProductDto> Handle(...) => ...
+}
+```
+
+---
+
+# ✅ 55. What Is the Mediator Pattern and How Is MediatR Used in ASP.NET Core?
+
+## 🧠 Concept
+
+The **Mediator Pattern** centralizes communication between components, avoiding direct dependencies.
+
+In ASP.NET Core, the [**MediatR**](https://github.com/jbogard/MediatR) library is commonly used to implement this pattern for **CQRS**.
+
+---
+
+## 🧩 Roles in MediatR
+
+| Concept              | Purpose                         |
+| -------------------- | ------------------------------- |
+| `IRequest<T>`        | A **command/query**             |
+| `IRequestHandler<T>` | Handles logic                   |
+| `IMediator`          | Dispatches requests to handlers |
+
+---
+
+## 📦 Example
+
+### 1. Command
+
+```csharp
+public record CreateUserCommand(string Email) : IRequest<Guid>;
+```
+
+### 2. Handler
+
+```csharp
+public class CreateUserHandler : IRequestHandler<CreateUserCommand, Guid>
+{
+    public async Task<Guid> Handle(CreateUserCommand cmd, CancellationToken ct)
+    {
+        var user = new User(cmd.Email);
+        await _repo.AddAsync(user);
+        return user.Id;
+    }
+}
+```
+
+### 3. Controller
+
+```csharp
+[HttpPost]
+public async Task<IActionResult> Create(CreateUserCommand cmd)
+{
+    var id = await _mediator.Send(cmd);
+    return Ok(id);
+}
+```
+
+---
+
+## ✅ Benefits of MediatR
+
+* Separates **business logic** from controllers
+* Makes each use case explicit
+* Enables **decorators** (logging, validation, etc.)
+* Ideal for **unit testing**
+
+---
+
+# ✅ 56. What is the Difference Between `Add-Migration` and `Update-Database`?
+
+## 🧩 `Add-Migration`
+
+Generates a **C# migration file** based on the changes in your entity models.
+
+```bash
+dotnet ef migrations add AddUserTable
+```
+
+➡️ Creates a file like:
+
+```csharp
+public partial class AddUserTable : Migration
+{
+    protected override void Up(MigrationBuilder migrationBuilder) { ... }
+    protected override void Down(MigrationBuilder migrationBuilder) { ... }
+}
+```
+
+> ❌ Does **not** affect the database yet.
+
+---
+
+## 🧩 `Update-Database`
+
+Applies all **pending migrations** to the actual **database**.
+
+```bash
+dotnet ef database update
+```
+
+➡️ Runs the `Up()` method from each migration file.
+
+---
+
+## ✅ Summary
+
+| Command           | Purpose                                     |
+| ----------------- | ------------------------------------------- |
+| `Add-Migration`   | Generates migration file from model changes |
+| `Update-Database` | Applies those changes to the database       |
+
+---
+
+# ✅ 57. How Do You Handle Concurrency in EF Core?
+
+## 🧠 Problem
+
+When two users update the same row simultaneously, **data loss** may occur. EF Core supports **Optimistic Concurrency** to avoid this.
+
+---
+
+## 🧩 Use a `RowVersion` Property
+
+### 1. Define a `byte[]` property:
+
+```csharp
+public class Product
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+
+    [Timestamp]
+    public byte[] RowVersion { get; set; }
+}
+```
+
+### 2. Enable in the model:
+
+EF Core does this automatically with `[Timestamp]`, or you can use:
+
+```csharp
+modelBuilder.Entity<Product>()
+    .Property(p => p.RowVersion)
+    .IsRowVersion();
+```
+
+---
+
+## ❗ What Happens?
+
+* EF includes the `RowVersion` in the `WHERE` clause.
+* If no rows are affected → EF throws `DbUpdateConcurrencyException`.
+
+---
+
+## ✅ Handling Conflict
+
+```csharp
+try
+{
+    await _context.SaveChangesAsync();
+}
+catch (DbUpdateConcurrencyException ex)
+{
+    // Handle conflict: reload, retry, notify user, etc.
+}
+```
+
+---
+
+# ✅ 58. What Are `Include`, `ThenInclude`, and Lazy Loading?
+
+## 🧩 Include
+
+Loads related entities **eagerly**.
+
+```csharp
+var orders = context.Orders
+    .Include(o => o.Customer)
+    .ToList();
+```
+
+---
+
+## 🧩 ThenInclude
+
+Used to **chain** navigation properties.
+
+```csharp
+context.Orders
+    .Include(o => o.Customer)
+        .ThenInclude(c => c.Address)
+    .ToList();
+```
+
+---
+
+## 🧩 Lazy Loading
+
+Related data is loaded **on first access**.
+
+### ✅ How to Enable
+
+1. Install package: `Microsoft.EntityFrameworkCore.Proxies`
+2. Enable in `DbContext`:
+
+```csharp
+options.UseLazyLoadingProxies();
+```
+
+3. Make nav props `virtual`:
+
+```csharp
+public virtual Customer Customer { get; set; }
+```
+
+---
+
+## ⚠️ Trade-offs
+
+| Approach          | Description              | Notes                     |
+| ----------------- | ------------------------ | ------------------------- |
+| Eager (`Include`) | Loads immediately        | More predictable          |
+| Lazy              | Loads on access          | May cause **N+1 problem** |
+| Explicit          | Use `context.Entry(...)` | Full control              |
+
+---
+
+# ✅ 59. How Do You Seed Initial Data in EF Core?
+
+## 🧩 Option 1: Fluent API Seeding (Recommended)
+
+```csharp
+modelBuilder.Entity<Role>().HasData(
+    new Role { Id = 1, Name = "Admin" },
+    new Role { Id = 2, Name = "User" }
+);
+```
+
+> ✔ Works with migrations (`Add-Migration` will detect it)
+
+---
+
+## 🧩 Option 2: Manual Seeding (On Startup)
+
+Good for dev/test data only:
+
+```csharp
+if (!context.Users.Any())
+{
+    context.Users.Add(new User { Name = "Admin" });
+    context.SaveChanges();
+}
+```
+
+Call this from a startup script (`SeedDatabase()` in `Program.cs`).
+
+---
+
+## 🧩 Option 3: Custom Seeding Service
+
+For large apps, inject a scoped service like:
+
+```csharp
+public interface IDataSeeder
+{
+    Task SeedAsync();
+}
+```
+
+Register it and call it on startup.
+
+---
+
+# ✅ 60. How Do You Manage Large Database Schemas (Splitting DbContexts)?
+
+## 🧠 Why Split?
+
+* Performance: reduce startup & migration time
+* Separation of concerns (e.g. IdentityDbContext vs AppDbContext)
+* Scalability
+
+---
+
+## 🧱 Typical Scenario
+
+```csharp
+public class IdentityContext : DbContext
+{
+    public DbSet<User> Users { get; set; }
+}
+
+public class CatalogContext : DbContext
+{
+    public DbSet<Product> Products { get; set; }
+}
+```
+
+Each has its own:
+
+* `DbContext`
+* `Migrations` folder
+* Connection string (optional)
+
+---
+
+## 🧪 How to Create Migrations Per Context
+
+```bash
+dotnet ef migrations add InitCatalog --context CatalogContext --output-dir Migrations/Catalog
+dotnet ef database update --context CatalogContext
+```
+
+---
+
+## ✅ Best Practices
+
+| Practice                             | Benefit                       |
+| ------------------------------------ | ----------------------------- |
+| One context per module               | Better boundaries and scaling |
+| Isolated migrations                  | Avoids merge conflicts        |
+| Clear naming (e.g. `CatalogContext`) | Easier maintenance            |
+
+---
+
+# ✅ 61. How Do You Diagnose a Slow API in Production?
+
+## 🧠 Key Strategies
+
+### ✅ 1. Enable Application Logging
+
+Use `ILogger<T>` to log execution times and exceptions.
+
+```csharp
+var stopwatch = Stopwatch.StartNew();
+// Do something
+_logger.LogInformation("Action took {Time}ms", stopwatch.ElapsedMilliseconds);
+```
+
+---
+
+### ✅ 2. Use Distributed Tracing (OpenTelemetry / Application Insights)
+
+* Correlate requests across microservices
+* Use tools: **Jaeger**, **Zipkin**, **Azure App Insights**
+
+```bash
+dotnet add package OpenTelemetry.Extensions.Hosting
+dotnet add package OpenTelemetry.Instrumentation.AspNetCore
+```
+
+---
+
+### ✅ 3. Middleware for Request Timing
+
+```csharp
+app.Use(async (context, next) =>
+{
+    var sw = Stopwatch.StartNew();
+    await next();
+    sw.Stop();
+    var elapsed = sw.ElapsedMilliseconds;
+    if (elapsed > 500)
+        _logger.LogWarning("Slow request: {Path} took {Elapsed}ms", context.Request.Path, elapsed);
+});
+```
+
+---
+
+### ✅ 4. Use Profiler / APM Tools
+
+* **dotTrace**, **PerfView**
+* **New Relic**, **Dynatrace**, **AppDynamics**
+
+---
+
+## 🧪 Other Tips
+
+* Use `AsNoTracking()` on read-only queries
+* Profile database: `EF Profiler`, `SQL Server Profiler`, `EXPLAIN`
+* Benchmark endpoints with `wrk`, `k6`, or `Apache Benchmark`
+
+---
+
+# ✅ 62. How Do You Use `IAsyncEnumerable<T>` in ASP.NET Core for Streaming?
+
+## 🧠 What Is It?
+
+`IAsyncEnumerable<T>` allows **asynchronous data streaming**. It’s ideal when:
+
+* You want to **return large datasets progressively**
+* You want to avoid memory spikes
+* You want to support cancellation
+
+---
+
+## 📦 Controller Example
+
+```csharp
+[HttpGet]
+public async IAsyncEnumerable<string> StreamUsers()
+{
+    for (int i = 1; i <= 5; i++)
+    {
+        await Task.Delay(500); // Simulate delay
+        yield return $"User {i}";
+    }
+}
+```
+
+---
+
+## 🧪 Client Streaming
+
+```bash
+curl http://localhost:5000/users/stream
+```
+
+---
+
+## ⚠️ Requirements
+
+* Return type: `IAsyncEnumerable<T>`
+* Enable buffering: `Response.Headers.Add("Transfer-Encoding", "chunked")` (if needed)
+
+---
+
+# ✅ 63. What Is Response Compression and How Do You Enable It?
+
+## 🧠 Why?
+
+Reduce **payload size** and **network time** using compression like **Gzip** or **Brotli**.
+
+---
+
+## 🧱 Add Middleware
+
+```bash
+dotnet add package Microsoft.AspNetCore.ResponseCompression
+```
+
+```csharp
+builder.Services.AddResponseCompression(options =>
+{
+    options.Providers.Add<GzipCompressionProvider>();
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
+    {
+        "application/json"
+    });
+});
+
+app.UseResponseCompression();
+```
+
+---
+
+## 📦 Configure Compression Level
+
+```csharp
+builder.Services.Configure<GzipCompressionProviderOptions>(opts =>
+{
+    opts.Level = CompressionLevel.Optimal;
+});
+```
+
+---
+
+## 🔍 Verify
+
+Check browser **Network tab → Content-Encoding: gzip**.
+
+---
+
+# ✅ 64. When and How Do You Use `Span<T>` or `Memory<T>` in .NET?
+
+## 🧠 Purpose
+
+`Span<T>` and `Memory<T>` are **stack-allocated** and **high-performance** types used to avoid heap allocations and improve efficiency when working with:
+
+* Arrays
+* Strings
+* Buffers
+
+---
+
+## 🧱 Span<T>
+
+* Fast, **stack-only**, non-async
+* Cannot be used in async methods
+
+```csharp
+Span<byte> buffer = stackalloc byte[256];
+var slice = buffer.Slice(0, 10);
+```
+
+---
+
+## 🧱 Memory<T>
+
+* **Heap-safe** and async-compatible version of `Span<T>`
+* Can be used in `async` methods
+
+```csharp
+public async Task ReadAsync(Memory<byte> buffer)
+{
+    await stream.ReadAsync(buffer);
+}
+```
+
+---
+
+## ✅ When to Use
+
+| Type        | Use Case                           |
+| ----------- | ---------------------------------- |
+| `Span<T>`   | High-performance, synchronous code |
+| `Memory<T>` | Async APIs, buffers, file streams  |
+
+---
+
+## ⚠️ Important
+
+`Span<T>` is not allowed in async/iterator methods — use `Memory<T>` instead.
+
+---
+
+# ✅ 65. What Are the Differences Between `IEnumerable`, `IQueryable`, and `AsNoTracking()`?
+
+| Concept          | Description                                   | Use Case                         |
+| ---------------- | --------------------------------------------- | -------------------------------- |
+| `IEnumerable<T>` | In-memory iteration                           | Local filtering, LINQ to objects |
+| `IQueryable<T>`  | Deferred execution and translated to SQL      | Efficient DB queries             |
+| `AsNoTracking()` | Improves performance by disabling EF tracking | Read-only queries                |
+
+---
+
+### 🔍 Example
+
+```csharp
+var query = context.Users
+    .Where(u => u.IsActive)       // IQueryable
+    .AsNoTracking()               // disables EF change tracking
+    .ToList();                    // executes query
+```
+
+---
+
+## 🔄 How They Work
+
+* `IEnumerable`: filtering done **in memory**
+* `IQueryable`: filtering done **in database**
+* `AsNoTracking`: skips EF change tracking to improve performance
+
+---
+
+## ✅ Summary
+
+| API              | Query Executed | Tracking     | Async Friendly |
+| ---------------- | -------------- | ------------ | -------------- |
+| `IEnumerable`    | After ToList() | N/A          | ✅              |
+| `IQueryable`     | SQL translated | ✅ by default | ✅              |
+| `AsNoTracking()` | SQL translated | ❌            | ✅              |
+
+---
+
+# ✅ 66. How Do You Mock `HttpClient` in Unit Tests?
+
+## 🧠 Why?
+
+`HttpClient` does not implement an interface, so you can't mock it directly. Instead, you mock its **underlying `HttpMessageHandler`**.
+
+---
+
+## 🧪 Example with Moq
+
+```csharp
+var handlerMock = new Mock<HttpMessageHandler>();
+
+handlerMock
+    .Protected()
+    .Setup<Task<HttpResponseMessage>>(
+        "SendAsync",
+        ItExpr.IsAny<HttpRequestMessage>(),
+        ItExpr.IsAny<CancellationToken>()
+    )
+    .ReturnsAsync(new HttpResponseMessage
+    {
+        StatusCode = HttpStatusCode.OK,
+        Content = new StringContent("{\"id\":1,\"name\":\"dog\"}", Encoding.UTF8, "application/json")
+    });
+
+var httpClient = new HttpClient(handlerMock.Object)
+{
+    BaseAddress = new Uri("https://api.test")
+};
+```
+
+Now inject `httpClient` into your service for testing.
+
+---
+
+## ✅ Summary
+
+| Technique    | Tool                       |
+| ------------ | -------------------------- |
+| Mock handler | `HttpMessageHandler`       |
+| Libraries    | Moq, NSubstitute, JustMock |
+
+---
+
+# ✅ 67. What Is `WebApplicationFactory` and How Do You Use It in Integration Tests?
+
+## 🧠 Concept
+
+`WebApplicationFactory<T>` is a testing utility from `Microsoft.AspNetCore.Mvc.Testing` that allows you to **spin up a real in-memory test server** for full integration tests.
+
+---
+
+## 🧪 Setup
+
+```bash
+dotnet add package Microsoft.AspNetCore.Mvc.Testing
+```
+
+---
+
+## 🧱 Example
+
+```csharp
+public class CustomWebAppFactory : WebApplicationFactory<Program>
+{
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.ConfigureServices(services =>
+        {
+            // Override dependencies for test
+        });
+    }
+}
+```
+
+### Usage:
+
+```csharp
+var factory = new CustomWebAppFactory();
+var client = factory.CreateClient();
+
+var response = await client.GetAsync("/api/users");
+```
+
+---
+
+## ✅ Benefits
+
+* Test full pipeline: routing, middleware, filters
+* Can inject test databases (e.g. InMemory or Testcontainers)
+* Works with Minimal APIs and Controllers
+
+---
+
+# ✅ 68. How Would You Test a Controller with JWT-Based Auth?
+
+## 🧱 Strategy
+
+You need to:
+
+* Create a **valid JWT token**
+* Attach it to your request's `Authorization` header
+* Configure your test host to accept it
+
+---
+
+## 🧪 Example with `TestServer`
+
+```csharp
+var token = GenerateJwtToken(); // mock signing with same key used in Startup
+
+var client = factory.CreateClient();
+client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+var response = await client.GetAsync("/api/secure-endpoint");
+response.EnsureSuccessStatusCode();
+```
+
+---
+
+### ✅ Token Generation in Tests
+
+```csharp
+var tokenHandler = new JwtSecurityTokenHandler();
+var key = Encoding.ASCII.GetBytes("YourTestingSecretKey");
+var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
+{
+    Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "test-user") }),
+    Expires = DateTime.UtcNow.AddHours(1),
+    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+});
+return tokenHandler.WriteToken(token);
+```
+
+> 🧠 Ensure your test environment uses the **same key** as the token generator.
+
+---
+
+# ✅ 69. How Do You Set Up CI/CD for ASP.NET Core on GitHub Actions or Azure DevOps?
+
+## 🧪 GitHub Actions Example
+
+Create `.github/workflows/build.yml`:
+
+```yaml
+name: Build and Test
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+    - run: dotnet restore
+    - run: dotnet build --configuration Release
+    - run: dotnet test --no-build --verbosity normal
+```
+
+---
+
+## 🧪 Azure DevOps YAML Example
+
+```yaml
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '8.0.x'
+
+- script: dotnet restore
+- script: dotnet build --configuration Release
+- script: dotnet test --no-build
+```
+
+---
+
+## ✅ Best Practices
+
+* Use `dotnet test` with code coverage
+* Add `dotnet publish` and `dotnet ef database update` for deployment
+* Use GitHub Secrets or Azure Key Vault for environment variables
+
+---
+
+# ✅ 70. What Is Testcontainers and How Is It Useful in .NET Testing?
+
+## 🧠 Concept
+
+[Testcontainers for .NET](https://github.com/testcontainers/testcontainers-dotnet) is a library that allows you to run **Docker containers from within your tests**.
+
+---
+
+## ✅ Use Cases
+
+* Run **real databases** (PostgreSQL, SQL Server, MongoDB) for integration tests
+* Run **message brokers** (RabbitMQ, Kafka)
+* Run services like **Redis**, **ElasticSearch**
+
+---
+
+## 🧱 Example: Start SQL Server Container
+
+```csharp
+var sqlContainer = new MsSqlTestcontainerBuilder()
+    .WithDatabase(new MsSqlTestcontainerConfiguration
+    {
+        Password = "yourStrong(!)Password"
+    })
+    .Build();
+
+await sqlContainer.StartAsync();
+```
+
+Use `sqlContainer.ConnectionString` in your test `DbContext`.
+
+---
+
+## ✅ Benefits
+
+| Feature         | Description                        |
+| --------------- | ---------------------------------- |
+| Isolation       | Fresh container per test class     |
+| Realistic tests | Real DB, real ports, real behavior |
+| Cross-platform  | Works on Linux, macOS, Windows     |
+
+---
+
+# ✅ 71. How Does Kestrel Work and How Do You Configure It?
+
+## 🧠 What Is Kestrel?
+
+Kestrel is the **cross-platform web server** included by default in ASP.NET Core. It’s responsible for:
+
+* Listening to HTTP/HTTPS requests
+* Processing middleware pipeline
+* Returning responses
+
+---
+
+## ⚙️ How to Configure It
+
+You can configure Kestrel in `Program.cs`:
+
+```csharp
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10 MB
+    options.Listen(IPAddress.Any, 5000); // HTTP
+    options.Listen(IPAddress.Any, 5001, listenOptions =>
+    {
+        listenOptions.UseHttps("cert.pfx", "password");
+    });
+});
+```
+
+---
+
+## 🧱 appsettings.json Example
+
+```json
+"Kestrel": {
+  "Endpoints": {
+    "Https": {
+      "Url": "https://localhost:5001",
+      "Certificate": {
+        "Path": "certs/localhost.pfx",
+        "Password": "yourpassword"
+      }
+    }
+  }
+}
+```
+
+---
+
+## ✅ Summary
+
+* Kestrel is **lightweight**, **high-perf**, and runs behind Nginx/IIS or standalone
+* Configurable in code or `appsettings.json`
+* Use it for **custom limits**, **TLS**, **port binding**
+
+---
+
+# ✅ 72. Difference Between `IHostedService`, `BackgroundService`, and `IAsyncDisposable`
+
+| Type                | Description                                               | Use Case                   |
+| ------------------- | --------------------------------------------------------- | -------------------------- |
+| `IHostedService`    | Interface for background tasks during app lifetime        | Custom hosted logic        |
+| `BackgroundService` | Abstract class that simplifies `IHostedService`           | Long-running jobs          |
+| `IAsyncDisposable`  | Cleanup logic for async resources (e.g. streams, sockets) | Graceful resource disposal |
+
+---
+
+## 🧪 `BackgroundService` Example
+
+```csharp
+public class Worker : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            Console.WriteLine("Running task...");
+            await Task.Delay(1000, stoppingToken);
+        }
+    }
+}
+```
+
+Register in DI:
+
+```csharp
+builder.Services.AddHostedService<Worker>();
+```
+
+---
+
+## 🧪 `IAsyncDisposable` Example
+
+```csharp
+public class MyDisposableService : IAsyncDisposable
+{
+    public async ValueTask DisposeAsync()
+    {
+        await _connection.DisposeAsync();
+    }
+}
+```
+
+---
+
+# ✅ 73. How Do Minimal APIs Compare to Traditional MVC Controllers?
+
+| Feature            | Minimal APIs                       | MVC Controllers               |
+| ------------------ | ---------------------------------- | ----------------------------- |
+| Setup              | `app.MapGet(...)`                  | `[ApiController]` classes     |
+| Lightweight        | ✅ Yes                              | ❌ More boilerplate            |
+| Testability        | Requires setup for DI              | More mature testing ecosystem |
+| Model binding      | ✅ With delegates and `FromBody`    | ✅ Full-featured               |
+| Filters/Middleware | Handled via decorators or global   | ✅ Action filters, attributes  |
+| OpenAPI Support    | ✅ With `SwaggerGen` and attributes | ✅ Native                      |
+
+---
+
+### 🧪 Minimal API Example
+
+```csharp
+app.MapPost("/login", async (LoginRequest request, IAuthService auth) =>
+{
+    var token = await auth.LoginAsync(request);
+    return Results.Ok(token);
+});
+```
+
+---
+
+### 🧪 Controller Example
+
+```csharp
+[ApiController]
+[Route("api/[controller]")]
+public class AuthController : ControllerBase
+{
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(LoginRequest request) => Ok(await _auth.LoginAsync(request));
+}
+```
+
+---
+
+## ✅ When to Use
+
+* Minimal APIs → for small apps, microservices, edge endpoints
+* MVC → for large applications with filters, versioning, inheritance, etc.
+
+---
+
+# ✅ 74. What Are Value Objects and Entities in DDD and How Do You Implement Them in C#?
+
+## 🧠 Definitions
+
+| Concept          | Description                               |
+| ---------------- | ----------------------------------------- |
+| **Entity**       | Has identity (`Id`) and mutable state     |
+| **Value Object** | Immutable, no identity, equality by value |
+
+---
+
+## 🧪 Entity Example
+
+```csharp
+public class User
+{
+    public Guid Id { get; private set; }
+    public string Email { get; private set; }
+}
+```
+
+---
+
+## 🧪 Value Object Example
+
+```csharp
+public record Address(string Street, string City);
+```
+
+✅ Two `Address("Main", "Paris")` are equal if their values match.
+
+---
+
+## ✅ Benefits
+
+* Value Objects improve **immutability**, **testability**, and **semantic modeling**
+* Entities represent real-world identity (`User`, `Order`, `Product`)
+
+---
+
+# ✅ 75. What’s the Role of `HttpContext.Items` and When Should You Use It?
+
+## 🧠 What Is It?
+
+`HttpContext.Items` is a **per-request dictionary** for storing and sharing temporary data between middleware/components.
+
+---
+
+## 🧱 Example Use Case
+
+### Middleware A (stores data)
+
+```csharp
+app.Use(async (context, next) =>
+{
+    context.Items["UserId"] = "abc123";
+    await next();
+});
+```
+
+### Middleware B or Controller (reads data)
+
+```csharp
+var userId = HttpContext.Items["UserId"]?.ToString();
+```
+
+---
+
+## ✅ When to Use
+
+* Pass data between middlewares
+* Store temporary info for **this request only**
+* Avoid storing global/shared data
+
+---
+
+## ❌ Don't Use For
+
+* Long-term caching
+* Cross-request data
+* Global state
+
+---
 
 
 
