@@ -2865,6 +2865,3206 @@ public IActionResult Refresh([FromBody] string refreshToken)
 
 ---
 
+# ✅ 23. How Would You Implement an Application That Allows Access to Certain Resources If a User Has Specific Permissions?
+
+## 🧠 Goal
+
+Implement **fine-grained authorization** based on **user-specific permissions**, not just roles.
+
+> 🔒 Example:
+>
+> * `user1` can **ReadProducts**
+> * `user2` can **EditUsers**
+> * You want to restrict access to endpoints based on **custom permissions**
+
+---
+
+## ✅ Step-by-Step: Implement Permission-Based Authorization
+
+---
+
+## 1️⃣ Define the Permissions
+
+Create a static class to hold permission constants:
+
+```csharp
+public static class Permissions
+{
+    public const string ReadProducts = "Permissions.ReadProducts";
+    public const string EditUsers = "Permissions.EditUsers";
+}
+```
+
+---
+
+## 2️⃣ Store Permissions in User Claims
+
+✅ When generating a JWT, include permissions as claims:
+
+```csharp
+var claims = new List<Claim>
+{
+    new Claim(ClaimTypes.Name, user.UserName),
+    new Claim("Permission", Permissions.ReadProducts),
+    new Claim("Permission", Permissions.EditUsers)
+};
+
+var token = new JwtSecurityToken(
+    issuer: "MyApp",
+    audience: "MyAppUsers",
+    claims: claims,
+    expires: DateTime.UtcNow.AddHours(1),
+    signingCredentials: creds);
+```
+
+> ✅ Each permission is a separate `Permission` claim.
+
+---
+
+## 3️⃣ Create a Custom Authorization Requirement
+
+```csharp
+public class PermissionRequirement : IAuthorizationRequirement
+{
+    public string Permission { get; }
+
+    public PermissionRequirement(string permission)
+    {
+        Permission = permission;
+    }
+}
+```
+
+---
+
+## 4️⃣ Create a Custom Authorization Handler
+
+```csharp
+public class PermissionHandler : AuthorizationHandler<PermissionRequirement>
+{
+    protected override Task HandleRequirementAsync(
+        AuthorizationHandlerContext context,
+        PermissionRequirement requirement)
+    {
+        var hasPermission = context.User.Claims
+            .Any(c => c.Type == "Permission" && c.Value == requirement.Permission);
+
+        if (hasPermission)
+        {
+            context.Succeed(requirement);
+        }
+
+        return Task.CompletedTask;
+    }
+}
+```
+
+---
+
+## 5️⃣ Register the Handler in `Program.cs`
+
+```csharp
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
+```
+
+---
+
+## 6️⃣ Define Policies for Each Permission
+
+```csharp
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("CanReadProducts", policy =>
+        policy.Requirements.Add(new PermissionRequirement(Permissions.ReadProducts)));
+
+    options.AddPolicy("CanEditUsers", policy =>
+        policy.Requirements.Add(new PermissionRequirement(Permissions.EditUsers)));
+});
+```
+
+---
+
+## 7️⃣ Apply the Policy to Controllers or Actions
+
+```csharp
+[Authorize(Policy = "CanReadProducts")]
+[HttpGet("products")]
+public IActionResult GetProducts()
+{
+    return Ok("You have permission to read products.");
+}
+
+[Authorize(Policy = "CanEditUsers")]
+[HttpPost("users/edit")]
+public IActionResult EditUser()
+{
+    return Ok("You can edit users.");
+}
+```
+
+---
+
+## 🧪 Minimal API Example
+
+```csharp
+app.MapGet("/products", [Authorize(Policy = "CanReadProducts")] () => "Products data");
+```
+
+---
+
+## 📌 Summary Table
+
+| Step                                 | Action                                   |
+| ------------------------------------ | ---------------------------------------- |
+| 1. Define permissions                | Use constants or enums                   |
+| 2. Add claims to user                | Include `"Permission"` claims in the JWT |
+| 3. Create `PermissionRequirement`    | Custom requirement for each permission   |
+| 4. Implement `PermissionHandler`     | Checks if user has the required claim    |
+| 5. Register in DI                    | Register `IAuthorizationHandler`         |
+| 6. Define policies                   | One policy per permission                |
+| 7. Use `[Authorize(Policy = "...")]` | Protect endpoints accordingly            |
+
+---
+
+# ✅ 24. What Is `HostedService` Used For in ASP.NET Core?
+
+## 🧠 What Is a Hosted Service?
+
+A **Hosted Service** in ASP.NET Core is a background task that runs **alongside the web application** — outside the request/response cycle.
+
+It implements the **`IHostedService`** interface or derives from **`BackgroundService`**, and is managed by the ASP.NET Core **generic host**.
+
+> 🛠️ Hosted services are ideal for tasks that need to run continuously, periodically, or in response to startup/shutdown events.
+
+---
+
+## 🧱 Common Use Cases
+
+| Use Case                         | Description                        |
+| -------------------------------- | ---------------------------------- |
+| 🧵 Long-running background tasks | e.g., queue processing, workers    |
+| 🔄 Periodic jobs                 | e.g., cleanup tasks, status checks |
+| 🌐 Polling external services     | e.g., API watchers, RSS fetchers   |
+| 🔔 Scheduled notifications       | e.g., email reminders, alerts      |
+| 💬 Message queue consumers       | e.g., RabbitMQ, Kafka consumers    |
+
+---
+
+## 🧪 Example: Basic Hosted Service
+
+### ✅ Create a class implementing `BackgroundService`
+
+```csharp
+public class MyBackgroundWorker : BackgroundService
+{
+    private readonly ILogger<MyBackgroundWorker> _logger;
+
+    public MyBackgroundWorker(ILogger<MyBackgroundWorker> logger)
+    {
+        _logger = logger;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        _logger.LogInformation("Background service is starting.");
+
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            _logger.LogInformation("Working at: {time}", DateTimeOffset.Now);
+            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+        }
+
+        _logger.LogInformation("Background service is stopping.");
+    }
+}
+```
+
+---
+
+### ✅ Register the service in `Program.cs`
+
+```csharp
+builder.Services.AddHostedService<MyBackgroundWorker>();
+```
+
+---
+
+## 🔁 Lifecycle Methods in `IHostedService`
+
+If you implement `IHostedService` manually (not via `BackgroundService`), you define:
+
+```csharp
+public class MyWorker : IHostedService
+{
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        // Initialization logic
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        // Cleanup logic
+        return Task.CompletedTask;
+    }
+}
+```
+
+---
+
+## 🔐 Hosted Service with Dependency Injection
+
+You can inject any service into the constructor:
+
+```csharp
+public MyWorker(ILogger<MyWorker> logger, IMyService service) { ... }
+```
+
+> The hosted service itself is **registered as singleton**, but injected services can be **scoped** via `IServiceScopeFactory`.
+
+---
+
+## ⚠️ Best Practices
+
+* Always check `stoppingToken.IsCancellationRequested` in loops.
+* Use `try/catch` inside `ExecuteAsync` to avoid crashing the host.
+* For scoped dependencies (e.g., `DbContext`), use `IServiceScopeFactory`.
+
+---
+
+## 📌 Summary Table
+
+| Feature             | Explanation                                       |
+| ------------------- | ------------------------------------------------- |
+| `IHostedService`    | Interface to implement background tasks           |
+| `BackgroundService` | Base class with `ExecuteAsync()`                  |
+| Lifetime            | Runs from app start to shutdown                   |
+| Common use cases    | Background jobs, queue consumers, scheduled tasks |
+| Registration        | Via `AddHostedService<T>()` in DI                 |
+
+---
+
+# ✅ 25. Explain the Difference Between `PeriodicTimer` and `await Task.Delay()`
+
+## 🧠 Overview
+
+Both `PeriodicTimer` and `Task.Delay()` are used for **delaying execution in asynchronous code**, especially in **background services**, but they differ significantly in **precision**, **control**, and **design purpose**.
+
+---
+
+## 🔁 1️⃣ `await Task.Delay(...)`
+
+### 🧱 What It Is
+
+* A general-purpose method that delays execution for a **specific duration**.
+* Commonly used in loops to simulate periodic tasks.
+
+### ✅ Example:
+
+```csharp
+while (!cancellationToken.IsCancellationRequested)
+{
+    DoWork();
+    await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+}
+```
+
+### ⚠️ Problem
+
+* Delay happens **after** `DoWork()`, so total interval = `DoWork duration + delay`.
+* Risk of **drift** over time.
+
+---
+
+## ⏱️ 2️⃣ `PeriodicTimer`
+
+### 🧱 What It Is
+
+* Introduced in **.NET 6**.
+* A **specialized timer** for running periodic tasks with **accurate intervals**, regardless of task duration.
+
+### ✅ Example:
+
+```csharp
+var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+
+while (await timer.WaitForNextTickAsync(cancellationToken))
+{
+    DoWork();
+}
+```
+
+### 🧠 How It Works
+
+* Automatically maintains a **steady interval** between ticks.
+* If `DoWork()` takes too long, ticks may be **skipped**, avoiding backlog.
+* Cleaner and safer for scheduled intervals.
+
+---
+
+## ⚖️ Side-by-Side Comparison
+
+| Feature              | `Task.Delay()`                       | `PeriodicTimer`                             |
+| -------------------- | ------------------------------------ | ------------------------------------------- |
+| Delay behavior       | Manual delay after work              | Waits for next tick                         |
+| Drift control        | ❌ Drift increases with task duration | ✅ Maintains accurate intervals              |
+| Skips missed ticks   | ❌ No — just delays again             | ✅ Yes — does not queue missed ticks         |
+| Cancellation support | ✅ via `CancellationToken`            | ✅ via `WaitForNextTickAsync(token)`         |
+| Best use case        | Simple delays or one-off waits       | Accurate recurring tasks in background jobs |
+| Introduced in        | .NET 4.5+                            | ✅ .NET 6 and later                          |
+
+---
+
+## 🛠️ When to Use What?
+
+| Scenario                           | Recommended Option |
+| ---------------------------------- | ------------------ |
+| Run a task every fixed interval    | `PeriodicTimer`    |
+| Delay after a task finishes        | `Task.Delay()`     |
+| Need precise scheduling            | `PeriodicTimer`    |
+| Need compatibility with .NET 5/4.8 | `Task.Delay()`     |
+
+---
+
+## 🧪 Example in a BackgroundService
+
+### ❌ Using `Task.Delay`:
+
+```csharp
+protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+{
+    while (!stoppingToken.IsCancellationRequested)
+    {
+        DoWork();
+        await Task.Delay(5000, stoppingToken); // includes work time + delay
+    }
+}
+```
+
+### ✅ Using `PeriodicTimer`:
+
+```csharp
+protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+{
+    var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+
+    while (await timer.WaitForNextTickAsync(stoppingToken))
+    {
+        DoWork(); // task duration doesn't affect next tick
+    }
+}
+```
+
+---
+
+## ✅ Summary
+
+* Use `**PeriodicTimer**` for **precise, recurring tasks** (introduced in .NET 6).
+* Use `**Task.Delay**` for **simple delays**, especially in older .NET versions or when drift isn’t critical.
+
+---
+
+# ✅ 26. What Is HSTS?
+
+## 🧠 Definition
+
+**HSTS** stands for **HTTP Strict Transport Security**.
+It’s a web security policy mechanism that forces browsers to **always use HTTPS** when communicating with your site — even if the user types `http://`.
+
+> ✅ HSTS protects users from **man-in-the-middle (MITM) attacks** and **protocol downgrade attacks**.
+
+---
+
+## 🔐 How Does HSTS Work?
+
+1. When a browser receives an HTTP response with an **`Strict-Transport-Security`** header, it remembers that:
+
+   * This domain **must only be accessed via HTTPS**
+   * For a specified **max duration**
+2. Next time the user types `http://your-site.com`, the browser **automatically upgrades** it to `https://your-site.com` — **without asking the server**.
+
+---
+
+## 📄 Header Example
+
+```http
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+```
+
+### Header breakdown:
+
+* `max-age=31536000`: tells browser to enforce HTTPS for 1 year (in seconds)
+* `includeSubDomains`: applies rule to all subdomains
+* `preload`: indicates the domain wants to be included in [Chrome's HSTS preload list](https://hstspreload.org)
+
+---
+
+## 🛠️ Enable HSTS in ASP.NET Core
+
+### ✅ In `Program.cs`:
+
+```csharp
+var app = builder.Build();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts(); // Enables HSTS middleware
+}
+
+app.UseHttpsRedirection();
+```
+
+### ✅ Optional: Configure options
+
+```csharp
+builder.Services.AddHsts(options =>
+{
+    options.Preload = true;
+    options.IncludeSubDomains = true;
+    options.MaxAge = TimeSpan.FromDays(365);
+});
+```
+
+> 💡 You should **not use HSTS in development** — only in **production**!
+
+---
+
+## ❗ Important Notes
+
+* **HSTS is enforced by the browser** — the server can’t force HTTPS if the client ignores it.
+* **First request** may still be over HTTP unless:
+
+  * The domain is on the HSTS preload list, or
+  * You always redirect to HTTPS (`UseHttpsRedirection`)
+* Don’t enable HSTS unless your site has **100% HTTPS coverage**
+
+---
+
+## 📌 Summary Table
+
+| Feature                 | Description                                                         |
+| ----------------------- | ------------------------------------------------------------------- |
+| HSTS                    | HTTP Strict Transport Security                                      |
+| Purpose                 | Forces client browsers to use HTTPS                                 |
+| Header                  | `Strict-Transport-Security`                                         |
+| ASP.NET Core middleware | `app.UseHsts()`                                                     |
+| Environment restriction | ✅ Only in production                                                |
+| Preloading              | Add your domain to the [HSTS preload list](https://hstspreload.org) |
+
+---
+
+# ✅ 27. How to Return a File from an API Endpoint in ASP.NET Core?
+
+## 🧠 Overview
+
+In ASP.NET Core, you can return a file from a controller or minimal API using the built-in **`File()`** helper method.
+
+> You can return files like:
+>
+> * PDF, images, Excel, Word
+> * Binary streams or physical files
+> * Downloadable content
+
+---
+
+## 🧱 Common Return Types
+
+| Return Method                         | Description                                |
+| ------------------------------------- | ------------------------------------------ |
+| `File(byte[], contentType, fileName)` | File from memory (e.g., generated content) |
+| `File(Stream, contentType)`           | File from a stream                         |
+| `PhysicalFile(...)`                   | File from physical path                    |
+| `VirtualFile(...)`                    | File from wwwroot (virtual path)           |
+
+---
+
+## ✅ 1. Return a File from Disk
+
+```csharp
+[HttpGet("download")]
+public IActionResult Download()
+{
+    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Files/report.pdf");
+    var contentType = "application/pdf";
+    var fileName = "report.pdf";
+
+    return PhysicalFile(filePath, contentType, fileName);
+}
+```
+
+---
+
+## ✅ 2. Return a File from a `byte[]` Array
+
+```csharp
+[HttpGet("invoice")]
+public IActionResult GetInvoice()
+{
+    byte[] fileBytes = System.IO.File.ReadAllBytes("Files/invoice.pdf");
+    return File(fileBytes, "application/pdf", "invoice.pdf");
+}
+```
+
+---
+
+## ✅ 3. Return a File from a `Stream`
+
+```csharp
+[HttpGet("stream")]
+public IActionResult DownloadStream()
+{
+    var filePath = "Files/image.png";
+    var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+    return File(stream, "image/png", "image.png");
+}
+```
+
+---
+
+## ✅ 4. Return File from `wwwroot` (Virtual File)
+
+```csharp
+[HttpGet("logo")]
+public IActionResult GetLogo()
+{
+    return VirtualFile("/assets/logo.png", "image/png", "company-logo.png");
+}
+```
+
+> 📁 Make sure the file is in `wwwroot/assets/` and `UseStaticFiles()` is enabled.
+
+---
+
+## ✅ 5. Return File with Minimal API
+
+```csharp
+app.MapGet("/download", () =>
+{
+    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Files/manual.pdf");
+    return Results.File(filePath, "application/pdf", "manual.pdf");
+});
+```
+
+---
+
+## 📄 Common MIME Types
+
+| File Type | Content Type                                                              |
+| --------- | ------------------------------------------------------------------------- |
+| PDF       | `application/pdf`                                                         |
+| PNG       | `image/png`                                                               |
+| JPEG      | `image/jpeg`                                                              |
+| ZIP       | `application/zip`                                                         |
+| CSV       | `text/csv`                                                                |
+| DOCX      | `application/vnd.openxmlformats-officedocument.wordprocessingml.document` |
+
+---
+
+## ⚠️ Tips
+
+* Always validate file paths to avoid directory traversal attacks.
+* Use streaming (`FileStream`) for large files to avoid memory issues.
+* Return proper content types to allow preview/download in browsers.
+
+---
+
+## 📌 Summary
+
+| Approach            | Use When                                     |
+| ------------------- | -------------------------------------------- |
+| `PhysicalFile()`    | Returning a file from disk                   |
+| `File(byte[], ...)` | Returning generated content or database BLOB |
+| `File(Stream, ...)` | Efficient large file transfer                |
+| `VirtualFile()`     | Serving files from `wwwroot`                 |
+| `Results.File()`    | In Minimal APIs                              |
+
+---
+
+# ✅ 28. How to Accept a File via an API Endpoint in ASP.NET Core?
+
+## 🧠 Overview
+
+In ASP.NET Core, you accept uploaded files using the `IFormFile` type.
+The client must send the file using a **`multipart/form-data`** request.
+
+> ✅ `IFormFile` represents a file sent with the HTTP request body.
+
+---
+
+## 🧱 Example: Single File Upload
+
+### ✅ 1. Create the Endpoint
+
+```csharp
+[HttpPost("upload")]
+public async Task<IActionResult> UploadFile(IFormFile file)
+{
+    if (file == null || file.Length == 0)
+        return BadRequest("No file uploaded.");
+
+    var path = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", file.FileName);
+
+    using (var stream = new FileStream(path, FileMode.Create))
+    {
+        await file.CopyToAsync(stream);
+    }
+
+    return Ok("File uploaded successfully.");
+}
+```
+
+---
+
+### 🔧 Notes
+
+* `file.Length`: checks file size
+* `file.FileName`: original filename from client
+* `file.CopyToAsync(...)`: writes to disk
+
+---
+
+## 🧪 Sample Request (via Postman or Curl)
+
+```
+POST /upload
+Content-Type: multipart/form-data
+Body: form-data
+Key: file (type: File) → choose a file to send
+```
+
+Or with `curl`:
+
+```bash
+curl -F "file=@example.pdf" https://localhost:5001/upload
+```
+
+---
+
+## 📚 Accepting Multiple Files
+
+```csharp
+[HttpPost("upload/multiple")]
+public async Task<IActionResult> UploadFiles(List<IFormFile> files)
+{
+    foreach (var file in files)
+    {
+        var path = Path.Combine("Uploads", file.FileName);
+        using var stream = new FileStream(path, FileMode.Create);
+        await file.CopyToAsync(stream);
+    }
+
+    return Ok("All files uploaded successfully.");
+}
+```
+
+> 🔑 Make sure the frontend uses `input type="file" multiple` and the request is multipart.
+
+---
+
+## 📦 File Size and Limitations
+
+By default, ASP.NET Core allows file uploads up to **30 MB**.
+
+You can increase the limit in `Program.cs`:
+
+```csharp
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 100_000_000; // 100 MB
+});
+```
+
+---
+
+## 🛡️ Security Tips
+
+| Recommendation                        | Reason                       |
+| ------------------------------------- | ---------------------------- |
+| Validate file extensions and size     | Prevent malicious uploads    |
+| Never trust `file.FileName`           | May be spoofed               |
+| Sanitize and rename uploaded files    | Avoid path traversal attacks |
+| Store files in a non-public directory | Protect sensitive data       |
+
+---
+
+## 🧩 Minimal API Version
+
+```csharp
+app.MapPost("/upload", async (IFormFile file) =>
+{
+    var path = Path.Combine("Uploads", file.FileName);
+    using var stream = new FileStream(path, FileMode.Create);
+    await file.CopyToAsync(stream);
+    return Results.Ok("Uploaded");
+});
+```
+
+---
+
+## 📌 Summary
+
+| Feature               | API Usage                   |
+| --------------------- | --------------------------- |
+| Single file upload    | `IFormFile file`            |
+| Multiple files        | `List<IFormFile> files`     |
+| Content-Type required | `multipart/form-data`       |
+| Copy to disk          | `file.CopyToAsync(stream)`  |
+| File size limit       | Configure via `FormOptions` |
+
+---
+
+# ✅ 29. How to Access Query String Parameters in an API Endpoint?
+
+## 🧠 What Is a Query String?
+
+A **query string** is part of the URL that comes after the `?` and provides additional parameters:
+
+```
+GET /products?category=books&page=2
+```
+
+---
+
+## 📘 Controller-Based API: Use Method Parameters
+
+ASP.NET Core automatically binds query string values to **action method parameters**.
+
+### ✅ Example:
+
+```csharp
+[HttpGet("search")]
+public IActionResult Search(string category, int page = 1)
+{
+    return Ok($"Category: {category}, Page: {page}");
+}
+```
+
+🧪 URL to call:
+
+```
+GET /api/search?category=books&page=2
+```
+
+> No attribute like `[FromQuery]` is needed — it works by default.
+
+---
+
+### 🔎 Optional: Use `[FromQuery]` Explicitly
+
+```csharp
+[HttpGet("filter")]
+public IActionResult Filter([FromQuery] string sortBy, [FromQuery] int limit = 10)
+{
+    return Ok($"Sort: {sortBy}, Limit: {limit}");
+}
+```
+
+---
+
+## 📘 Model Binding with Complex Objects
+
+You can bind query params to a class automatically:
+
+```csharp
+public class ProductFilter
+{
+    public string Category { get; set; }
+    public int Page { get; set; }
+}
+
+[HttpGet("products")]
+public IActionResult GetProducts([FromQuery] ProductFilter filter)
+{
+    return Ok($"Category: {filter.Category}, Page: {filter.Page}");
+}
+```
+
+🧪 Request:
+
+```
+GET /products?category=books&page=3
+```
+
+---
+
+## 📘 Minimal APIs: Just Use Parameters
+
+### ✅ Example:
+
+```csharp
+app.MapGet("/search", (string keyword, int page) =>
+{
+    return Results.Ok($"Keyword: {keyword}, Page: {page}");
+});
+```
+
+🧪 Call:
+
+```
+GET /search?keyword=aspnet&page=1
+```
+
+ASP.NET Core binds query parameters automatically.
+
+---
+
+### 🔎 Optional: Use `HttpContext.Request.Query`
+
+Use this only when you want **manual access**:
+
+```csharp
+[HttpGet("manual")]
+public IActionResult Manual()
+{
+    var query = HttpContext.Request.Query;
+    var value = query["key"];
+    return Ok($"Value: {value}");
+}
+```
+
+---
+
+## 📌 Summary
+
+| Method                 | Description                        |
+| ---------------------- | ---------------------------------- |
+| `string param`         | Automatically binds query strings  |
+| `[FromQuery] param`    | Explicitly binds from query        |
+| `ComplexType`          | Binds to a class via `[FromQuery]` |
+| `Request.Query["key"]` | Manual access via `HttpContext`    |
+| Minimal API parameters | Directly bind from query           |
+
+---
+
+# ✅ 30. How to Get Current Logged-In User Information in ASP.NET Core?
+
+## 🧠 Overview
+
+In ASP.NET Core, once a user is authenticated, their identity is available via the `HttpContext.User` property — a `ClaimsPrincipal` object that contains all the **claims** from the token or cookie.
+
+---
+
+## ✅ 1. Access `User` in a Controller or Razor Page
+
+```csharp
+public class AccountController : Controller
+{
+    [Authorize]
+    public IActionResult Profile()
+    {
+        var username = User.Identity?.Name; // from ClaimTypes.Name
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+        return Ok(new { Username = username, UserId = userId, Role = role });
+    }
+}
+```
+
+> 🧠 `User` is available by default in any controller or Razor page via `ControllerBase.User`.
+
+---
+
+## ✅ 2. Access Claims in Minimal API
+
+```csharp
+app.MapGet("/me", [Authorize] (HttpContext http) =>
+{
+    var user = http.User;
+
+    var username = user.Identity?.Name;
+    var email = user.FindFirst(ClaimTypes.Email)?.Value;
+
+    return Results.Ok(new { username, email });
+});
+```
+
+---
+
+## ✅ 3. Common Claim Types
+
+| Claim Type                         | Description                        |
+| ---------------------------------- | ---------------------------------- |
+| `ClaimTypes.Name`                  | Usually the username               |
+| `ClaimTypes.Email`                 | User’s email address               |
+| `ClaimTypes.Role`                  | User’s role                        |
+| `ClaimTypes.NameIdentifier`        | User ID (usually a GUID or DB ID)  |
+| Custom claim (e.g. `"Permission"`) | Any additional value your app uses |
+
+---
+
+## ✅ 4. Injecting `IHttpContextAccessor` (Outside Controllers)
+
+Use this when accessing the user in **services or background tasks**:
+
+### Register in `Program.cs`:
+
+```csharp
+builder.Services.AddHttpContextAccessor();
+```
+
+### Use in a service:
+
+```csharp
+public class MyService
+{
+    private readonly IHttpContextAccessor _accessor;
+
+    public MyService(IHttpContextAccessor accessor)
+    {
+        _accessor = accessor;
+    }
+
+    public string GetUserId()
+    {
+        var user = _accessor.HttpContext?.User;
+        return user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    }
+}
+```
+
+---
+
+## 📌 Summary
+
+| Method                      | Use Case                              |
+| --------------------------- | ------------------------------------- |
+| `User.Identity.Name`        | Get current username                  |
+| `User.FindFirst(...).Value` | Read specific claims                  |
+| `HttpContext.User`          | Available in controllers & middleware |
+| `IHttpContextAccessor`      | Use in services or outside pipeline   |
+
+---
+
+✅ Requires the user to be **authenticated** via:
+
+* JWT tokens (`Authorization: Bearer`)
+* Cookie authentication
+* External providers (Google, Azure AD, etc.)
+
+---
+
+# ✅ 31. How to Inject Dependencies in Minimal APIs in ASP.NET Core?
+
+## 🧠 Overview
+
+Minimal APIs in ASP.NET Core allow **dependency injection (DI)** directly into the **route handler parameters** — no need for controllers or constructors.
+
+> ✅ You can inject any registered service (e.g. DbContext, logger, custom service) by adding it as a **parameter** in the endpoint lambda.
+
+---
+
+## ✅ 1. Inject via Lambda Parameters
+
+ASP.NET Core automatically resolves parameters from the **DI container** if their types are registered.
+
+### 🧱 Example:
+
+```csharp
+app.MapGet("/greet", (ILogger<Program> logger) =>
+{
+    logger.LogInformation("Hello from Minimal API");
+    return Results.Ok("Hello");
+});
+```
+
+> The framework knows `ILogger<Program>` is a DI service, so it injects it automatically.
+
+---
+
+## ✅ 2. Inject Custom Services
+
+### 🔧 Register a service in `Program.cs`
+
+```csharp
+builder.Services.AddScoped<IGreetingService, GreetingService>();
+```
+
+### ✅ Use it in a route
+
+```csharp
+app.MapGet("/hello", (IGreetingService greetingService) =>
+{
+    return Results.Ok(greetingService.SayHello());
+});
+```
+
+```csharp
+public interface IGreetingService
+{
+    string SayHello();
+}
+
+public class GreetingService : IGreetingService
+{
+    public string SayHello() => "Hello from service!";
+}
+```
+
+---
+
+## ✅ 3. Inject Multiple Services
+
+```csharp
+app.MapGet("/info", (
+    ILogger<Program> logger,
+    IMyService service,
+    IConfiguration config) =>
+{
+    var message = config["AppSettings:Message"];
+    logger.LogInformation("Accessed /info endpoint");
+    return Results.Ok(new { data = service.GetData(), message });
+});
+```
+
+---
+
+## ✅ 4. Inject Services + Route Parameters
+
+```csharp
+app.MapGet("/product/{id}", (int id, IProductService productService) =>
+{
+    var product = productService.GetById(id);
+    return product is not null ? Results.Ok(product) : Results.NotFound();
+});
+```
+
+---
+
+## 🛠 Advanced: Inject Scoped Services Manually (if needed)
+
+```csharp
+app.MapGet("/scoped", async (IServiceScopeFactory scopeFactory) =>
+{
+    using var scope = scopeFactory.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<MyDbContext>();
+    var items = await dbContext.Items.ToListAsync();
+    return Results.Ok(items);
+});
+```
+
+---
+
+## 🔎 When DI Works
+
+| Type             | Can be Injected? | Example                  |
+| ---------------- | ---------------- | ------------------------ |
+| `ILogger<T>`     | ✅ Yes            | Logging                  |
+| `IConfiguration` | ✅ Yes            | Access appsettings.json  |
+| `IOptions<T>`    | ✅ Yes            | Typed config settings    |
+| `DbContext`      | ✅ Yes            | Data access with EF Core |
+| Custom services  | ✅ Yes            | Must be registered in DI |
+| HttpContext      | ✅ Yes            | `(HttpContext http)`     |
+
+---
+
+## ✅ Summary
+
+| Method                     | Description                                 |
+| -------------------------- | ------------------------------------------- |
+| Lambda parameter injection | Most common in Minimal APIs                 |
+| Register in `Services`     | Use `AddScoped`, `AddSingleton`, etc.       |
+| Works for any DI type      | Including `ILogger`, `DbContext`, `Options` |
+| Route params + services    | Combine route inputs with injected services |
+
+---
+
+# ✅ 32. How Would You Structure Your Minimal API Endpoints?
+
+## 🧠 Overview
+
+Minimal APIs are great for small or fast projects, but **structuring them properly** is essential for:
+
+* Maintainability
+* Separation of concerns
+* Testability
+* Scalability
+
+---
+
+## 🔧 Recommended Structure for Minimal APIs
+
+### 📁 Suggested Folder Layout
+
+```
+/MyApp
+│
+├── Program.cs
+├── Endpoints
+│   ├── ProductsEndpoints.cs
+│   ├── UsersEndpoints.cs
+│
+├── Services
+│   ├── IProductService.cs
+│   ├── ProductService.cs
+│
+├── Models
+│   ├── Product.cs
+│   ├── User.cs
+│
+├── Data
+│   └── AppDbContext.cs
+```
+
+---
+
+## 🧩 Step-by-Step Example
+
+---
+
+### ✅ 1. Define Routes in Dedicated Endpoint Files
+
+#### 🗂 `Endpoints/ProductsEndpoints.cs`
+
+```csharp
+public static class ProductsEndpoints
+{
+    public static void MapProducts(this IEndpointRouteBuilder app)
+    {
+        app.MapGet("/products", async (IProductService service) =>
+        {
+            var products = await service.GetAllAsync();
+            return Results.Ok(products);
+        });
+
+        app.MapPost("/products", async (Product product, IProductService service) =>
+        {
+            await service.CreateAsync(product);
+            return Results.Created($"/products/{product.Id}", product);
+        });
+    }
+}
+```
+
+---
+
+### ✅ 2. Register Endpoints in `Program.cs`
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+
+app.MapProducts(); // 👈 Extension method for clean grouping
+
+app.Run();
+```
+
+---
+
+### ✅ 3. Organize Business Logic in Services
+
+#### 🗂 `Services/IProductService.cs`
+
+```csharp
+public interface IProductService
+{
+    Task<IEnumerable<Product>> GetAllAsync();
+    Task CreateAsync(Product product);
+}
+```
+
+#### 🗂 `Services/ProductService.cs`
+
+```csharp
+public class ProductService : IProductService
+{
+    private readonly AppDbContext _context;
+
+    public ProductService(AppDbContext context) => _context = context;
+
+    public async Task<IEnumerable<Product>> GetAllAsync() => await _context.Products.ToListAsync();
+
+    public async Task CreateAsync(Product product)
+    {
+        _context.Products.Add(product);
+        await _context.SaveChangesAsync();
+    }
+}
+```
+
+Register in `Program.cs`:
+
+```csharp
+builder.Services.AddScoped<IProductService, ProductService>();
+```
+
+---
+
+## ➕ Optional Enhancements
+
+### ✅ Use `RouteGroupBuilder` (Grouping in .NET 7+)
+
+```csharp
+public static void MapProducts(this IEndpointRouteBuilder app)
+{
+    var group = app.MapGroup("/products").RequireAuthorization();
+
+    group.MapGet("/", async (IProductService s) => Results.Ok(await s.GetAllAsync()));
+    group.MapPost("/", async (Product p, IProductService s) => {
+        await s.CreateAsync(p);
+        return Results.Created($"/products/{p.Id}", p);
+    });
+}
+```
+
+### ✅ Add OpenAPI Documentation with Annotations
+
+Use `Swashbuckle.AspNetCore` or `MinimalApis.Extensions` for better Swagger docs.
+
+---
+
+## 📌 Best Practices
+
+| Practice                    | Why it matters                            |
+| --------------------------- | ----------------------------------------- |
+| Group endpoints by resource | Improves clarity (e.g., `/products`)      |
+| Use extension methods       | Keeps `Program.cs` clean                  |
+| Keep logic in services      | Promotes SRP and testability              |
+| Use DTOs and validation     | Prevents over-posting, enforces contracts |
+| Prefer async I/O            | Improves scalability                      |
+
+---
+
+## ✅ Summary
+
+| Task              | Recommended Approach                      |
+| ----------------- | ----------------------------------------- |
+| Group routes      | Use `MapGroup()` or endpoint extensions   |
+| Split logic       | Into `/Endpoints`, `/Services`, `/Models` |
+| Avoid fat lambdas | Delegate business logic to services       |
+| Secure endpoints  | Use `[Authorize]`, policies, route groups |
+| Add validation    | Use FluentValidation or manual checks     |
+
+---
+
+# ✅ 33. What Is Output Caching in ASP.NET Core?
+
+## 🧠 Definition
+
+**Output Caching** is a performance optimization technique where **the result of a controller action or endpoint is cached** and **served to subsequent requests without re-executing the action**.
+
+> 🔁 It avoids unnecessary computation and database access for frequently requested data.
+
+---
+
+## 🚀 Key Benefits
+
+* ✅ Reduces server processing
+* ✅ Improves response time
+* ✅ Lowers database load
+* ✅ Works well for **read-heavy endpoints**
+
+---
+
+## 🔧 Output Caching vs Response Caching
+
+| Feature              | Output Caching                | Response Caching                    |
+| -------------------- | ----------------------------- | ----------------------------------- |
+| Stores entire output | ✅ Yes (server-side)           | ❌ No (relies on client/proxy)       |
+| Based on parameters  | ✅ Yes (query, headers, route) | ❌ Limited                           |
+| Supports policies    | ✅ Yes                         | ❌ Minimal                           |
+| Middleware support   | ✅ .NET 7+ built-in            | ✅ Older alternative (cache headers) |
+
+---
+
+## 📦 Available In
+
+* ✅ Built-in since **ASP.NET Core 7**
+* ✅ Enhanced in **ASP.NET Core 8** with policies and fine-grained control
+
+---
+
+## ✅ Example: Enabling Output Caching
+
+### 1️⃣ In `Program.cs`:
+
+```csharp
+builder.Services.AddOutputCache(); // Register output cache service
+
+var app = builder.Build();
+
+app.UseOutputCache(); // Add middleware to pipeline
+```
+
+---
+
+### 2️⃣ Apply Output Caching to an Endpoint
+
+#### ✅ Minimal API:
+
+```csharp
+app.MapGet("/time", () =>
+{
+    return DateTime.UtcNow.ToString("HH:mm:ss");
+})
+.CacheOutput(p => p.Expire(TimeSpan.FromSeconds(10)));
+```
+
+#### ✅ MVC Controller:
+
+```csharp
+[HttpGet]
+[OutputCache(Duration = 10)]
+public IActionResult GetTime()
+{
+    return Ok(DateTime.UtcNow.ToString("HH:mm:ss"));
+}
+```
+
+🕒 Within 10 seconds, repeated calls return the **cached response** — after that, it's refreshed.
+
+---
+
+## 🔧 Customize Cache with Policies (ASP.NET Core 8+)
+
+```csharp
+builder.Services.AddOutputCache(options =>
+{
+    options.AddPolicy("ShortCache", policy => policy.Expire(TimeSpan.FromSeconds(5)));
+});
+```
+
+Apply policy:
+
+```csharp
+app.MapGet("/products", GetProducts).CacheOutput("ShortCache");
+```
+
+---
+
+## ❗ Caching Based on Input
+
+You can vary caching based on:
+
+* Query parameters
+* Route parameters
+* Request headers
+
+```csharp
+.CacheOutput(p => p
+    .Expire(TimeSpan.FromSeconds(10))
+    .SetVaryByQuery("category"));
+```
+
+---
+
+## 🔥 Cache Invalidation
+
+In .NET 8+, you can programmatically **evict cache entries**:
+
+```csharp
+var cache = app.Services.GetRequiredService<IOutputCacheStore>();
+await cache.EvictByTagAsync("Products", CancellationToken.None);
+```
+
+---
+
+## 📌 Summary Table
+
+| Feature         | Description                                              |
+| --------------- | -------------------------------------------------------- |
+| Output Caching  | Caches the entire HTTP response                          |
+| Location        | Server-side                                              |
+| Supported since | .NET 7+                                                  |
+| Used via        | `UseOutputCache()` + `[OutputCache]` or `.CacheOutput()` |
+| Customization   | Supports policies, expiration, vary-by                   |
+| Ideal for       | Read-heavy, infrequently changing endpoints              |
+
+---
+
+# ✅ 34. Difference Between `IMemoryCache` and `IDistributedCache` in ASP.NET Core
+
+## 🧠 Overview
+
+Both `IMemoryCache` and `IDistributedCache` are interfaces for **caching data** in ASP.NET Core, but they serve different purposes and work differently.
+
+---
+
+## 📦 1. `IMemoryCache`
+
+### 🧱 Description
+
+* Stores data **in memory (RAM)** of the **local web server**
+* Fastest access time (in-process)
+* Suitable for **single-instance apps**
+
+### ✅ Example
+
+```csharp
+var cache = app.Services.GetRequiredService<IMemoryCache>();
+
+cache.Set("key", "value", TimeSpan.FromMinutes(10));
+
+if (cache.TryGetValue("key", out string result))
+{
+    Console.WriteLine(result); // "value"
+}
+```
+
+---
+
+### ➕ Pros
+
+* ✅ Super fast (in-memory)
+* ✅ Easy to use
+* ✅ Supports expiration, eviction, and cache priority
+
+### ➖ Cons
+
+* ❌ Not shared between servers
+* ❌ Cache is lost if the app restarts
+* ❌ Not ideal for load-balanced or distributed environments
+
+---
+
+## 📦 2. `IDistributedCache`
+
+### 🧱 Description
+
+* Stores cache **outside the app** (e.g., Redis, SQL Server)
+* Designed for **distributed systems or cloud apps**
+* All servers in a web farm can **share** the cache
+
+### ✅ Example
+
+```csharp
+var cache = app.Services.GetRequiredService<IDistributedCache>();
+
+await cache.SetStringAsync("key", "value");
+
+var value = await cache.GetStringAsync("key");
+Console.WriteLine(value); // "value"
+```
+
+---
+
+### Supported Providers
+
+* Redis (`AddStackExchangeRedisCache`)
+* SQL Server (`AddDistributedSqlServerCache`)
+* Custom implementations
+
+---
+
+### ➕ Pros
+
+* ✅ Shared across multiple instances
+* ✅ Survives app restarts
+* ✅ Suitable for microservices and cloud apps
+
+### ➖ Cons
+
+* ❌ Slightly slower (network latency)
+* ❌ Requires external infrastructure (Redis, SQL, etc.)
+* ❌ No eviction or expiration logic by default (must configure it)
+
+---
+
+## 📊 Side-by-Side Comparison
+
+| Feature                     | `IMemoryCache`               | `IDistributedCache`               |
+| --------------------------- | ---------------------------- | --------------------------------- |
+| Storage location            | In-memory (in-process)       | External store (Redis, SQL, etc.) |
+| Performance                 | ✅ Fastest                    | ❌ Slower (network involved)       |
+| Availability across servers | ❌ No (per-instance only)     | ✅ Yes (shared/distributed)        |
+| Scenarios                   | Single-server, local caching | Load-balanced apps, microservices |
+| Configuration required      | None                         | Yes (external provider setup)     |
+| Data type                   | Any object                   | `byte[]` or `string`              |
+| Expiration policies         | ✅ Built-in                   | ❌ Must be handled manually        |
+
+---
+
+## 🧪 When to Use What?
+
+| Scenario                              | Use This            |
+| ------------------------------------- | ------------------- |
+| Local-only, fast in-memory cache      | `IMemoryCache`      |
+| Distributed app, multiple servers     | `IDistributedCache` |
+| Caching ViewModels, small blobs       | `IMemoryCache`      |
+| Session or token caching in web farms | `IDistributedCache` |
+
+---
+
+## ✅ Summary
+
+* `IMemoryCache` is best for **simple, fast, per-instance caching**.
+* `IDistributedCache` is best for **shared cache across multiple servers** (e.g., **Redis** in the cloud).
+* Use **both** together if needed: fast access with `IMemoryCache`, backup consistency with `IDistributedCache`.
+
+---
+
+# ✅ 35. Explain How HybridCache / FusionCache Works
+
+## 🧠 What Is a Hybrid Cache?
+
+A **hybrid cache** combines the speed of **in-memory caching** (`IMemoryCache`) with the scalability of **distributed caching** (`IDistributedCache`).
+
+> ✅ Goal: Get **fast local access** and **shared consistency across multiple instances**.
+
+---
+
+## 🚀 What Is FusionCache?
+
+**FusionCache** is a high-performance .NET caching library that provides:
+
+* ✅ **Hybrid caching** (memory + distributed)
+* ✅ **Fail-safe** caching
+* ✅ **Background factory refresh**
+* ✅ **Cache stampede prevention**
+* ✅ Strong `Task`-based API with timeout handling
+
+It's available as a NuGet package:
+
+```bash
+dotnet add package ZiggyCreatures.FusionCache
+```
+
+---
+
+## ⚙️ How Does It Work?
+
+When using FusionCache with a distributed backend (e.g. Redis), the logic is:
+
+1. Check **local memory cache** first → fastest
+2. If not found or expired:
+
+   * Try **distributed cache** (e.g. Redis)
+3. If still not found:
+
+   * Call the **factory method** (fetch from DB or API)
+   * Store in both **memory** and **distributed** cache
+
+> 🔁 This reduces pressure on Redis and avoids expensive DB/API calls.
+
+---
+
+## 🧱 FusionCache Setup in ASP.NET Core
+
+### 1️⃣ Register in `Program.cs`
+
+```csharp
+builder.Services.AddMemoryCache();
+
+builder.Services.AddFusionCache()
+    .WithDefaultEntryOptions(new FusionCacheEntryOptions
+    {
+        Duration = TimeSpan.FromSeconds(30),
+        IsFailSafeEnabled = true
+    })
+    .WithDistributedCache(new RedisCache(new RedisCacheOptions
+    {
+        Configuration = "localhost:6379"
+    }));
+```
+
+---
+
+### 2️⃣ Use in Services or Endpoints
+
+```csharp
+public class ProductService
+{
+    private readonly IFusionCache _cache;
+
+    public ProductService(IFusionCache cache)
+    {
+        _cache = cache;
+    }
+
+    public async Task<Product> GetProductByIdAsync(int id)
+    {
+        return await _cache.GetOrSetAsync<Product>(
+            $"product:{id}",
+            async _ =>
+            {
+                // Simulate DB call
+                await Task.Delay(100);
+                return new Product { Id = id, Name = "Apple" };
+            },
+            TimeSpan.FromMinutes(5)
+        );
+    }
+}
+```
+
+---
+
+## 🧩 Key Features of FusionCache
+
+| Feature                | Description                                                 |
+| ---------------------- | ----------------------------------------------------------- |
+| ✅ Hybrid cache         | Uses both in-memory and distributed cache                   |
+| 🧠 Fail-safe           | Returns stale data if backend is unavailable (configurable) |
+| 🔄 Auto-refresh        | Refreshes entries in background on expiration               |
+| 🚫 Stampede protection | Prevents multiple concurrent calls for the same key         |
+| 🔁 `GetOrSetAsync`     | Smart wrapper around common caching pattern                 |
+| 🧪 Manual invalidation | Supports `RemoveAsync` and `SetAsync`                       |
+
+---
+
+## 🔄 What Problem Does It Solve?
+
+| Problem                            | How FusionCache Helps                         |
+| ---------------------------------- | --------------------------------------------- |
+| Slow distributed cache lookups     | Uses in-memory cache for fast access          |
+| Cache stampedes (multiple reloads) | Locks and deduplicates concurrent cache calls |
+| Downtime in backend APIs           | Fail-safe mode returns stale cached data      |
+| Consistency across instances       | Syncs with distributed cache (e.g., Redis)    |
+
+---
+
+## ✅ Summary
+
+| Feature             | FusionCache                                    |
+| ------------------- | ---------------------------------------------- |
+| Based on            | `IMemoryCache` + `IDistributedCache`           |
+| Use case            | Fast and resilient hybrid caching              |
+| Key methods         | `GetOrSetAsync`, `TryGet`, `Remove`, etc.      |
+| Providers supported | Memory, Redis, SQL Server, custom              |
+| Ideal for           | APIs, microservices, high-traffic applications |
+
+---
+
+# ✅ 36. What Caching Patterns Do You Know?
+
+## 🧠 What Is a Caching Pattern?
+
+A **caching pattern** defines how and when to **store** and **retrieve** data from cache to improve performance, reduce latency, and prevent unnecessary processing or database access.
+
+---
+
+## 🔁 Common Caching Patterns
+
+### 1️⃣ **Cache-Aside** (Lazy Loading)
+
+#### 📚 Description
+
+* The app **checks the cache first**
+* If not found, it **loads from DB or source**, stores the result in cache, and returns it
+* Most popular and flexible pattern
+
+#### ✅ Use Case
+
+* Database queries
+* External API calls
+
+#### 🧱 Example
+
+```csharp
+public async Task<Product> GetProductAsync(int id)
+{
+    var cacheKey = $"product:{id}";
+    var cached = await _cache.GetStringAsync(cacheKey);
+
+    if (cached != null)
+        return JsonSerializer.Deserialize<Product>(cached);
+
+    var product = await _db.Products.FindAsync(id); // Load from DB
+    await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(product));
+
+    return product;
+}
+```
+
+---
+
+### 2️⃣ **Write-Through Cache**
+
+#### 📚 Description
+
+* Data is **written to both** cache and database at the same time
+* Ensures cache is **always up-to-date**
+
+#### ✅ Use Case
+
+* Read-heavy systems where cache must always be valid
+
+#### ⚠️ Trade-off
+
+* Slightly slower writes due to caching step
+
+---
+
+### 3️⃣ **Write-Behind Cache** (Deferred Write)
+
+#### 📚 Description
+
+* Data is written to **cache first**, and database updates are **delayed or queued**
+* Useful for high-write environments where DB writes can be batched
+
+#### ⚠️ Risk
+
+* Potential data loss if cache is lost before DB write
+
+---
+
+### 4️⃣ **Read-Through Cache**
+
+#### 📚 Description
+
+* Cache is responsible for **loading** the data if it's missing
+* Common in **distributed cache systems** (e.g., Redis with loaders)
+
+> FusionCache's `GetOrSetAsync` behaves like a read-through cache.
+
+---
+
+### 5️⃣ **Refresh-Ahead (Proactive Refresh)**
+
+#### 📚 Description
+
+* Data is refreshed in the background **before** it expires
+* Prevents latency spikes when cache expires
+
+#### ✅ Use Case
+
+* Time-sensitive data (stock prices, dashboards)
+
+#### 🚀 Example with FusionCache
+
+```csharp
+new FusionCacheEntryOptions
+{
+    Duration = TimeSpan.FromMinutes(5),
+    AllowBackgroundRefreshed = true
+}
+```
+
+---
+
+### 6️⃣ **Cache Invalidation**
+
+#### 📚 Description
+
+* Cache is **cleared/updated** when data changes
+* Prevents serving stale data
+
+#### ✅ Techniques
+
+* Manual removal (`RemoveAsync`)
+* Eviction by tag (e.g., in FusionCache)
+* Pub/sub invalidation (e.g., Redis with events)
+
+---
+
+### 7️⃣ **Sliding vs Absolute Expiration**
+
+| Strategy                | Description                                   |
+| ----------------------- | --------------------------------------------- |
+| **Absolute Expiration** | Item expires after a fixed time               |
+| **Sliding Expiration**  | Item expires if not accessed in a time window |
+
+```csharp
+_memoryCache.Set("key", value, new MemoryCacheEntryOptions
+{
+    SlidingExpiration = TimeSpan.FromMinutes(5)
+});
+```
+
+---
+
+### 8️⃣ **Cache Stampede Prevention**
+
+#### 📚 Description
+
+* Prevents multiple threads from hitting the DB simultaneously on cache miss
+* Solved by **locking**, **deduplication**, or libraries like **FusionCache**
+
+---
+
+## 🧩 Summary Table
+
+| Pattern             | Description                              | Suitable For                    |
+| ------------------- | ---------------------------------------- | ------------------------------- |
+| Cache-Aside         | Load-on-demand, stores in cache          | Most general purpose use        |
+| Write-Through       | Write to cache and DB simultaneously     | Strict consistency requirements |
+| Write-Behind        | Delay DB writes                          | High-write scenarios            |
+| Read-Through        | Cache handles data loading automatically | External caching services       |
+| Refresh-Ahead       | Pre-warms data before expiration         | Realtime dashboards, analytics  |
+| Invalidation        | Manual or event-based cache clearing     | Data updates or deletes         |
+| Stampede Prevention | Deduplicates parallel cache misses       | High-concurrency endpoints      |
+
+---
+
+## ✅ Best Practice
+
+* 🔁 **Use Cache-Aside** + **Expiration**
+* ⚠️ **Never cache sensitive or user-specific data** unless scoped properly
+* 📦 Use libraries like **FusionCache** for advanced patterns out of the box
+
+---
+
+# ✅ 37. What Is Rate Limiting Used For and What Types Do You Know?
+
+## 🧠 What Is Rate Limiting?
+
+**Rate Limiting** is a technique used to **control the number of requests** a client can make to an API within a specific time window.
+
+> ✅ It helps **protect APIs** from abuse, denial-of-service attacks, and excessive load — ensuring **fair usage** among users.
+
+---
+
+## 🔒 Why Use Rate Limiting?
+
+| Purpose                   | Description                                    |
+| ------------------------- | ---------------------------------------------- |
+| 🛡️ Protect the server    | Prevent overload or abuse                      |
+| ⚖️ Fair usage enforcement | Ensure no single client consumes all resources |
+| 🔐 Security               | Deter brute force or spam attacks              |
+| 💰 Cost control           | Avoid excessive usage of paid services/APIs    |
+
+---
+
+## ⚙️ Types of Rate Limiting
+
+ASP.NET Core (starting .NET 7) supports built-in **Rate Limiting middleware** via `Microsoft.AspNetCore.RateLimiting`.
+
+### 1️⃣ **Fixed Window**
+
+* ✅ Allows N requests per fixed time window (e.g., 100 requests every 1 minute)
+* Simple and efficient
+
+```csharp
+options.AddPolicy("fixed", context =>
+    RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey: context.Connection.RemoteIpAddress?.ToString(),
+        factory: _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromSeconds(10),
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 2
+        }));
+```
+
+---
+
+### 2️⃣ **Sliding Window**
+
+* ✅ Smoother than fixed window
+* Tracks requests within a sliding time window (e.g., last 60 seconds)
+
+```csharp
+options.AddPolicy("sliding", context =>
+    RateLimitPartition.GetSlidingWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString(),
+        _ => new SlidingWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromSeconds(30),
+            SegmentsPerWindow = 3
+        }));
+```
+
+---
+
+### 3️⃣ **Token Bucket**
+
+* ✅ Allows bursts of traffic while controlling the average rate
+* Each request **uses a token** from a “bucket”; tokens are replenished over time
+
+```csharp
+options.AddPolicy("token", context =>
+    RateLimitPartition.GetTokenBucketLimiter(
+        context.Connection.RemoteIpAddress?.ToString(),
+        _ => new TokenBucketRateLimiterOptions
+        {
+            TokenLimit = 10,
+            TokensPerPeriod = 1,
+            ReplenishmentPeriod = TimeSpan.FromSeconds(1)
+        }));
+```
+
+---
+
+### 4️⃣ **Concurrency Limit**
+
+* ✅ Controls how many **concurrent requests** can be processed at once
+* Useful to prevent thread starvation or DB overload
+
+```csharp
+options.AddPolicy("concurrent", context =>
+    RateLimitPartition.GetConcurrencyLimiter(
+        context.Connection.RemoteIpAddress?.ToString(),
+        _ => new ConcurrencyLimiterOptions
+        {
+            PermitLimit = 2,
+            QueueLimit = 1,
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+        }));
+```
+
+---
+
+## 🚀 How to Use Rate Limiting in ASP.NET Core
+
+### ✅ 1. Add the middleware
+
+```csharp
+builder.Services.AddRateLimiter(options =>
+{
+    options.GlobalLimiter = RateLimitPartition.GetFixedWindowLimiter(...);
+    options.RejectionStatusCode = 429;
+});
+```
+
+### ✅ 2. Add `UseRateLimiter` to the pipeline
+
+```csharp
+app.UseRateLimiter();
+```
+
+### ✅ 3. Apply to endpoints
+
+```csharp
+app.MapGet("/limited", () => "OK")
+   .RequireRateLimiting("fixed");
+```
+
+---
+
+## 📊 Summary Table
+
+| Type              | Description                                  | Best For                         |
+| ----------------- | -------------------------------------------- | -------------------------------- |
+| Fixed Window      | N requests per fixed period                  | Simple limits                    |
+| Sliding Window    | More accurate than fixed, reduces bursts     | Smoother traffic                 |
+| Token Bucket      | Allows bursts, replenishes over time         | APIs with spiky usage            |
+| Concurrency Limit | Limits number of parallel in-flight requests | DB-heavy or CPU-bound operations |
+
+---
+
+## 🛡️ Real-World Tips
+
+* 🔑 Use **IP address** or **user ID** as partition key
+* ⚠️ Always return `HTTP 429 Too Many Requests`
+* ⏱️ Include `Retry-After` headers if possible
+* 🔐 Combine with **authentication** and **API keys** for better control
+
+---
+
+# ✅ 38. How to Invalidate Data in `OutputCache` (ASP.NET Core)?
+
+## 🧠 What Is Output Cache Invalidation?
+
+When data changes (e.g., product updated or deleted), the **cached response** might become outdated.
+
+**Invalidating** the output cache ensures:
+
+* The next request generates fresh content
+* You don't serve stale data
+
+---
+
+## 📦 Built-in `OutputCache` API (since .NET 7 / improved in .NET 8)
+
+You can invalidate cache **manually** using:
+
+```csharp
+IOutputCacheStore
+```
+
+---
+
+## ✅ Common Invalidation Strategies
+
+---
+
+### 1️⃣ Invalidate by Cache **Tag**
+
+You can **tag** cached responses, and later **evict by tag**.
+
+### 🧱 Define cache with a tag:
+
+```csharp
+app.MapGet("/products", GetProducts)
+   .CacheOutput(p => p
+       .Expire(TimeSpan.FromMinutes(10))
+       .Tag("products"));
+```
+
+### 🧼 Evict by tag:
+
+```csharp
+public class ProductService
+{
+    private readonly IOutputCacheStore _cache;
+
+    public ProductService(IOutputCacheStore cache)
+    {
+        _cache = cache;
+    }
+
+    public async Task UpdateProductAsync(Product p)
+    {
+        // Update DB logic here...
+
+        await _cache.EvictByTagAsync("products", CancellationToken.None);
+    }
+}
+```
+
+---
+
+### 2️⃣ Invalidate by Cache **Key**
+
+If you know the exact cache key, you can evict it directly.
+
+```csharp
+await _cache.EvictAsync("product-detail-123", CancellationToken.None);
+```
+
+You must assign the key explicitly:
+
+```csharp
+.CacheOutput(p => p.SetCacheKey("product-detail-123"))
+```
+
+---
+
+### 3️⃣ Use Short Expiration (when frequent updates)
+
+If invalidation is too complex, you can set **shorter expiration windows**:
+
+```csharp
+.CacheOutput(p => p.Expire(TimeSpan.FromSeconds(30)));
+```
+
+---
+
+## 🔄 Rebuild After Invalidate?
+
+No — output cache will rebuild itself **on the next request** to the endpoint.
+
+---
+
+## 📌 Summary
+
+| Method              | When to Use                                |
+| ------------------- | ------------------------------------------ |
+| `EvictByTagAsync()` | Invalidate all entries tagged (bulk clear) |
+| `EvictAsync(key)`   | Invalidate a specific entry                |
+| Short expiration    | If data changes too frequently             |
+
+---
+
+## 🧠 Tip
+
+✅ Prefer **tags** for grouped resources like:
+
+* `products`
+* `user-profile:{id}`
+* `invoices`
+
+Use them consistently in `.CacheOutput()` to simplify invalidation.
+
+---
+
+# ✅ 39. How to Implement API Versioning in ASP.NET Core?
+
+## 🧠 Why API Versioning?
+
+API versioning allows you to **evolve your API without breaking existing clients**.
+
+> ✅ Clients can choose the version they support, while you ship new features in newer versions.
+
+---
+
+## 🔧 1. Install NuGet Package
+
+```bash
+dotnet add package Microsoft.AspNetCore.Mvc.Versioning
+```
+
+---
+
+## 🧱 2. Register Versioning in `Program.cs`
+
+```csharp
+builder.Services.AddApiVersioning(options =>
+{
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.ReportApiVersions = true;
+});
+```
+
+---
+
+## 🧩 3. Choose a Versioning Strategy
+
+ASP.NET Core supports multiple methods:
+
+| Method           | Description                      | Example                        |
+| ---------------- | -------------------------------- | ------------------------------ |
+| **URL Segment**  | Version is in route path         | `/api/v1/products`             |
+| **Query String** | Version is in query param        | `/api/products?api-version=1`  |
+| **Header**       | Version in custom request header | `api-version: 1.0`             |
+| **Media Type**   | Version via `Accept` header      | `Accept: application/json;v=1` |
+
+You can configure it like so:
+
+```csharp
+options.ApiVersionReader = ApiVersionReader.Combine(
+    new QueryStringApiVersionReader("api-version"),
+    new HeaderApiVersionReader("x-api-version")
+);
+```
+
+---
+
+## 🧱 4. Create Versioned Controllers
+
+```csharp
+[ApiController]
+[Route("api/v{version:apiVersion}/products")]
+[ApiVersion("1.0")]
+public class ProductsV1Controller : ControllerBase
+{
+    [HttpGet]
+    public IActionResult Get() => Ok("Product list - v1");
+}
+```
+
+```csharp
+[ApiController]
+[Route("api/v{version:apiVersion}/products")]
+[ApiVersion("2.0")]
+public class ProductsV2Controller : ControllerBase
+{
+    [HttpGet]
+    public IActionResult Get() => Ok("Product list - v2");
+}
+```
+
+> 🧠 Use route constraints: `v{version:apiVersion}`
+
+---
+
+## 🔄 Optional: Use `MapToApiVersion` for Method-Level Versioning
+
+```csharp
+[HttpGet]
+[MapToApiVersion("1.0")]
+public IActionResult GetV1() => Ok("v1");
+
+[HttpGet]
+[MapToApiVersion("2.0")]
+public IActionResult GetV2() => Ok("v2");
+```
+
+---
+
+## 🔍 5. Versioning in Minimal APIs
+
+As of .NET 8, there's **experimental** or **manual** support. You can use different route groups:
+
+```csharp
+app.MapGroup("/api/v1").MapGet("/products", GetV1Handler);
+app.MapGroup("/api/v2").MapGet("/products", GetV2Handler);
+```
+
+> For now, controllers offer the most structured versioning support.
+
+---
+
+## 📦 Output Example (with `ReportApiVersions = true`)
+
+```http
+GET /api/products?api-version=1.0
+
+Response Headers:
+api-supported-versions: 1.0, 2.0
+api-deprecated-versions: 1.0
+```
+
+---
+
+## 📌 Best Practices
+
+| Tip                                 | Why                                          |
+| ----------------------------------- | -------------------------------------------- |
+| Version breaking changes only       | Minor fixes should not require a new version |
+| Avoid too many versions             | Maintainability decreases with each version  |
+| Use header or media-type versioning | Keeps URLs clean and RESTful                 |
+| Deprecate old versions gradually    | Give clients time to migrate                 |
+
+---
+
+## ✅ Summary
+
+| Step                     | Task                                    |
+| ------------------------ | --------------------------------------- |
+| Install package          | `Microsoft.AspNetCore.Mvc.Versioning`   |
+| Configure services       | `AddApiVersioning` in `Program.cs`      |
+| Choose strategy          | URL, Query, Header, or MediaType        |
+| Version your controllers | Use `[ApiVersion]` and versioned routes |
+| Test responses           | Verify with `api-version` and headers   |
+
+---
+
+# ✅ 40. How to Add API Versioning Without Changing the URL?
+
+## 🧠 Context
+
+In some cases, you're not allowed to version the API via the **URL path** (`/api/v1/products`).
+So you must **preserve existing routes** like:
+
+```
+GET /api/products
+```
+
+But still version the API under the hood.
+
+---
+
+## 🧩 Supported Alternatives (URL-Stable Versioning)
+
+ASP.NET Core allows **non-URL versioning methods**:
+
+| Strategy         | Where the version is provided    | Example                          |
+| ---------------- | -------------------------------- | -------------------------------- |
+| **Query String** | `?api-version=1.0`               | `/api/products?api-version=1.0`  |
+| **Header**       | Custom header                    | `x-api-version: 1.0`             |
+| **Media Type**   | Via `Accept` content-type header | `Accept: application/json;v=1.0` |
+
+---
+
+## ✅ 1. Configure API Versioning
+
+### In `Program.cs`:
+
+```csharp
+builder.Services.AddApiVersioning(options =>
+{
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.ReportApiVersions = true;
+
+    options.ApiVersionReader = ApiVersionReader.Combine(
+        new QueryStringApiVersionReader("api-version"),
+        new HeaderApiVersionReader("x-api-version"),
+        new MediaTypeApiVersionReader()
+    );
+});
+```
+
+> 👆 This allows the client to specify the version **outside of the URL**.
+
+---
+
+## ✅ 2. Use Same Route for Multiple Versions
+
+```csharp
+[ApiController]
+[Route("api/products")]
+[ApiVersion("1.0")]
+public class ProductsV1Controller : ControllerBase
+{
+    [HttpGet]
+    public IActionResult Get() => Ok("Products v1");
+}
+```
+
+```csharp
+[ApiController]
+[Route("api/products")]
+[ApiVersion("2.0")]
+public class ProductsV2Controller : ControllerBase
+{
+    [HttpGet]
+    public IActionResult Get() => Ok("Products v2");
+}
+```
+
+🧪 Example requests:
+
+```http
+GET /api/products?api-version=1.0
+GET /api/products (with header x-api-version: 2.0)
+GET /api/products (with Accept: application/json;v=2.0)
+```
+
+---
+
+## 🧪 3. Example with Media-Type Versioning
+
+```http
+Accept: application/json;v=2.0
+```
+
+The version is read from the `Accept` header.
+
+---
+
+## 🔍 Optional: Method-Level Versioning
+
+Instead of separate controllers, you can use `[MapToApiVersion]`:
+
+```csharp
+[HttpGet]
+[MapToApiVersion("1.0")]
+public IActionResult GetV1() => Ok("v1 result");
+
+[HttpGet]
+[MapToApiVersion("2.0")]
+public IActionResult GetV2() => Ok("v2 result");
+```
+
+Same route, but responds differently based on the version.
+
+---
+
+## 🧠 Summary
+
+| Requirement                | ✅ Solution                                         |
+| -------------------------- | -------------------------------------------------- |
+| Don't change URL structure | Use header, query string, or media-type versioning |
+| Support multiple versions  | Use `[ApiVersion]` with same route                 |
+| Client version control     | Clients choose version via query/header/media      |
+| Future-ready versioning    | Easy to extend without breaking existing clients   |
+
+---
+
+## ✅ Recap
+
+To version an existing API without touching the URL:
+
+* Use `QueryStringApiVersionReader`, `HeaderApiVersionReader`, or `MediaTypeApiVersionReader`
+* Keep `[Route("api/resource")]` the same in all versions
+* Decorate each controller with `[ApiVersion("x.y")]`
+
+---
+
+# ✅ 41. What Is Swagger Used For?
+
+## 🧠 Definition
+
+**Swagger** is a set of **open-source tools** built around the **OpenAPI specification** that allows developers to:
+
+* 📖 **Document** RESTful APIs
+* ✅ **Test** endpoints interactively
+* 🚀 **Explore** available operations and models
+* 📦 **Generate clients** and SDKs in multiple languages
+
+> In ASP.NET Core, Swagger is typically integrated via the `Swashbuckle.AspNetCore` package.
+
+---
+
+## 🔧 What Does Swagger Provide?
+
+| Feature                   | Description                                                                                     |
+| ------------------------- | ----------------------------------------------------------------------------------------------- |
+| 📝 API Documentation      | Auto-generates docs from controllers and models                                                 |
+| 🧪 Interactive UI         | Test endpoints from browser (via Swagger UI)                                                    |
+| 🔄 OpenAPI JSON Export    | Exports spec as machine-readable `.json`                                                        |
+| 📦 Client Code Generation | Tools like NSwag or Swagger Codegen use the spec to generate SDKs in C#, TypeScript, Java, etc. |
+
+---
+
+## 📦 How to Set Up Swagger in ASP.NET Core
+
+### ✅ 1. Install NuGet Package
+
+```bash
+dotnet add package Swashbuckle.AspNetCore
+```
+
+---
+
+### ✅ 2. Configure in `Program.cs`
+
+```csharp
+builder.Services.AddEndpointsApiExplorer(); // Required for Minimal APIs
+builder.Services.AddSwaggerGen();
+```
+
+```csharp
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(); // Optional config: c => c.SwaggerEndpoint(...)
+}
+```
+
+---
+
+### ✅ 3. Run and Access UI
+
+After running the app:
+
+```
+https://localhost:5001/swagger
+```
+
+This shows an **interactive UI** for all your endpoints and schemas.
+
+---
+
+## 🧪 Example Swagger Output
+
+```json
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "DogWalk API",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/users": {
+      "get": {
+        "summary": "Returns list of users",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+## 🧩 Common Use Cases
+
+| Use Case                  | Description                                       |
+| ------------------------- | ------------------------------------------------- |
+| 📚 API documentation      | Show methods, inputs, responses                   |
+| 👨‍💻 Developer testing   | Test endpoints directly via Swagger UI            |
+| 🔐 Token-based testing    | Authorize with JWT and test secured routes        |
+| 🔄 SDK generation         | Generate client code with tools like NSwag        |
+| 📤 Shareable API contract | Provide frontend teams a contract for integration |
+
+---
+
+## 🔐 Add JWT Support to Swagger UI
+
+```csharp
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer {token}'",
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+```
+
+---
+
+## ✅ Summary
+
+| Feature          | Benefit                                    |
+| ---------------- | ------------------------------------------ |
+| 📝 Documentation | Automatically shows all API endpoints      |
+| 🧪 Testing       | Try requests with real data in the browser |
+| 🔐 Auth Testing  | Test secure endpoints (JWT, OAuth2, etc.)  |
+| 🔄 Spec Export   | Export OpenAPI `.json` file for codegen    |
+
+---
+
+# ✅ 42. How to Add Documentation of Endpoints, Models and Fields in Swagger?
+
+> 🔍 Swagger (via OpenAPI spec) supports rich documentation directly from your code using:
+
+* XML Comments
+* Attributes
+* Fluent API configuration
+
+---
+
+## 🧱 1. Documenting **Endpoints** (Controllers, Actions)
+
+### ✅ Add XML Comments
+
+First, enable XML comments in your `.csproj` file:
+
+```xml
+<PropertyGroup>
+  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  <NoWarn>$(NoWarn);1591</NoWarn> <!-- optional: ignore warnings for missing comments -->
+</PropertyGroup>
+```
+
+Then, update Swagger configuration in `Program.cs`:
+
+```csharp
+builder.Services.AddSwaggerGen(c =>
+{
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, "YourApi.xml");
+    c.IncludeXmlComments(xmlPath);
+});
+```
+
+### ✏️ Add summary to your controller/action:
+
+```csharp
+/// <summary>
+/// Returns all users in the system.
+/// </summary>
+[HttpGet]
+public IActionResult GetUsers()
+{
+    return Ok(_userService.GetAll());
+}
+```
+
+This appears in Swagger UI under the `GET /users` endpoint.
+
+---
+
+## 🧱 2. Documenting **Models**
+
+### ✅ Use XML Comments in your classes:
+
+```csharp
+/// <summary>
+/// Represents a user in the system.
+/// </summary>
+public class UserDto
+{
+    /// <summary>
+    /// The user's unique ID.
+    /// </summary>
+    public Guid Id { get; set; }
+
+    /// <summary>
+    /// The user's full name.
+    /// </summary>
+    public string FullName { get; set; }
+}
+```
+
+These comments will appear in the Swagger UI model schema.
+
+---
+
+## 🧩 3. Using Data Annotations for Metadata
+
+While XML comments describe purpose, attributes describe **constraints**:
+
+```csharp
+public class ProductDto
+{
+    [Required]
+    [MaxLength(50)]
+    public string Name { get; set; }
+
+    [Range(0, 9999)]
+    public decimal Price { get; set; }
+}
+```
+
+Swagger will show:
+
+* Required fields
+* Value constraints
+* Data types
+
+---
+
+## 🧪 4. Add Descriptions Manually via Fluent API (Advanced)
+
+In `SwaggerGen` config, you can also customize descriptions:
+
+```csharp
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "DogWalk API",
+        Version = "v1",
+        Description = "API for connecting dog owners and sitters"
+    });
+});
+```
+
+---
+
+## 🔐 5. Document Authorization Requirements
+
+Use `[Authorize]` or `AllowAnonymous`, and configure Swagger to display auth info (see Q41 for full setup).
+
+You can also decorate endpoints with custom attributes:
+
+```csharp
+[Authorize(Roles = "Admin")]
+/// <summary>
+/// Deletes a user (Admin only).
+/// </summary>
+[HttpDelete("{id}")]
+public IActionResult DeleteUser(Guid id) { ... }
+```
+
+---
+
+## ✅ Summary
+
+| What You’re Documenting | How To Do It                            |
+| ----------------------- | --------------------------------------- |
+| **Endpoints**           | XML comments on controller methods      |
+| **Models**              | XML comments + DataAnnotations          |
+| **Fields**              | `[Required]`, `[Range]`, `[MaxLength]`  |
+| **API Info**            | `SwaggerDoc()` in `AddSwaggerGen`       |
+| **Authentication**      | `[Authorize]` + `AddSecurityDefinition` |
+
+---
+
+# ✅ 43. How to Get a Connection String from Configuration?
+
+## 📦 1. Define It in `appsettings.json`
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=MyDb;User Id=sa;Password=your_password;"
+  }
+}
+```
+
+---
+
+## 🧱 2. Access It in `Program.cs` (or Startup)
+
+```csharp
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+```
+
+This retrieves the value from:
+
+```json
+"ConnectionStrings": {
+  "DefaultConnection": "..."
+}
+```
+
+---
+
+## 🔧 3. Register the DB Context with the Connection String
+
+```csharp
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"))
+);
+```
+
+> ✅ This is the most common pattern when using EF Core.
+
+---
+
+## 📦 4. Access from a Service or Class
+
+### ✅ Option A: Inject `IConfiguration`
+
+```csharp
+public class MyService
+{
+    private readonly string _connString;
+
+    public MyService(IConfiguration config)
+    {
+        _connString = config.GetConnectionString("DefaultConnection");
+    }
+}
+```
+
+---
+
+### ✅ Option B: Bind to a Settings Class
+
+#### In `appsettings.json`:
+
+```json
+"MyAppSettings": {
+  "DefaultConnection": "Server=localhost;Database=MyDb;..."
+}
+```
+
+#### POCO Class:
+
+```csharp
+public class MyAppSettings
+{
+    public string DefaultConnection { get; set; }
+}
+```
+
+#### Register in `Program.cs`:
+
+```csharp
+builder.Services.Configure<MyAppSettings>(
+    builder.Configuration.GetSection("MyAppSettings"));
+```
+
+#### Inject with `IOptions`:
+
+```csharp
+public class MyService
+{
+    private readonly string _connString;
+
+    public MyService(IOptions<MyAppSettings> options)
+    {
+        _connString = options.Value.DefaultConnection;
+    }
+}
+```
+
+---
+
+## ✅ Summary
+
+| Method                        | Description                         |
+| ----------------------------- | ----------------------------------- |
+| `GetConnectionString("Name")` | Shortcut for `"ConnectionStrings"`  |
+| `GetSection("...").Value`     | Use for custom structure            |
+| `IOptions<T>` binding         | Strong-typed config binding         |
+| Works with secrets/env vars   | Yes, supports layering and override |
+
+---
+
+Here’s your answer to question 43 in **Markdown**, explaining how to **get a connection string** from the `appsettings.json` configuration file in **ASP.NET Core**.
+
+---
+
+# ✅ 43. How to Get a Connection String from Configuration?
+
+## 📦 1. Define It in `appsettings.json`
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=MyDb;User Id=sa;Password=your_password;"
+  }
+}
+```
+
+---
+
+## 🧱 2. Access It in `Program.cs` (or Startup)
+
+```csharp
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+```
+
+This retrieves the value from:
+
+```json
+"ConnectionStrings": {
+  "DefaultConnection": "..."
+}
+```
+
+---
+
+## 🔧 3. Register the DB Context with the Connection String
+
+```csharp
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"))
+);
+```
+
+> ✅ This is the most common pattern when using EF Core.
+
+---
+
+## 📦 4. Access from a Service or Class
+
+### ✅ Option A: Inject `IConfiguration`
+
+```csharp
+public class MyService
+{
+    private readonly string _connString;
+
+    public MyService(IConfiguration config)
+    {
+        _connString = config.GetConnectionString("DefaultConnection");
+    }
+}
+```
+
+---
+
+### ✅ Option B: Bind to a Settings Class
+
+#### In `appsettings.json`:
+
+```json
+"MyAppSettings": {
+  "DefaultConnection": "Server=localhost;Database=MyDb;..."
+}
+```
+
+#### POCO Class:
+
+```csharp
+public class MyAppSettings
+{
+    public string DefaultConnection { get; set; }
+}
+```
+
+#### Register in `Program.cs`:
+
+```csharp
+builder.Services.Configure<MyAppSettings>(
+    builder.Configuration.GetSection("MyAppSettings"));
+```
+
+#### Inject with `IOptions`:
+
+```csharp
+public class MyService
+{
+    private readonly string _connString;
+
+    public MyService(IOptions<MyAppSettings> options)
+    {
+        _connString = options.Value.DefaultConnection;
+    }
+}
+```
+
+---
+
+## ✅ Summary
+
+| Method                        | Description                         |
+| ----------------------------- | ----------------------------------- |
+| `GetConnectionString("Name")` | Shortcut for `"ConnectionStrings"`  |
+| `GetSection("...").Value`     | Use for custom structure            |
+| `IOptions<T>` binding         | Strong-typed config binding         |
+| Works with secrets/env vars   | Yes, supports layering and override |
+
+---
+
+# ✅ 44. How Can You Deploy an ASP.NET Core Application?
+
+ASP.NET Core is **cross-platform**, so you can deploy it on:
+
+* 🐧 Linux (Ubuntu, Debian, etc.)
+* 🪟 Windows Server
+* ☁️ Cloud services (Azure, AWS, GCP, etc.)
+* 🐳 Docker containers
+
+---
+
+## 🚀 1. Deployment Targets
+
+| Target                              | Description                              |
+| ----------------------------------- | ---------------------------------------- |
+| **Azure App Service**               | PaaS for hosting .NET apps in minutes    |
+| **IIS on Windows**                  | Host on-prem apps on Windows Server      |
+| **Linux + Nginx**                   | Host via reverse proxy (Kestrel + Nginx) |
+| **Docker**                          | Containerized deployment                 |
+| **Kubernetes**                      | Scalable container orchestration         |
+| **GitHub Pages / Vercel / Netlify** | Only for frontend apps (e.g., React)     |
+
+---
+
+## 🛠️ 2. Deployment Options
+
+### ✅ Option A: **Self-Contained Deployment (SCD)**
+
+Publishes the app with the entire .NET runtime (no need to install .NET on host).
+
+```bash
+dotnet publish -c Release -r linux-x64 --self-contained true -o ./publish
+```
+
+### ✅ Option B: **Framework-Dependent Deployment (FDD)**
+
+Smaller, but requires .NET runtime on the server.
+
+```bash
+dotnet publish -c Release -o ./publish
+```
+
+---
+
+## ☁️ 3. Azure App Service (Most Common)
+
+1. Go to Azure Portal → Create App Service
+2. Select **Runtime Stack: .NET 8**
+3. Deploy via:
+
+   * Visual Studio / GitHub Actions / Azure CLI / FTP / WebDeploy
+4. Optional: Configure **CI/CD** with GitHub Actions
+
+```bash
+az webapp up --name MyAspApp --resource-group MyGroup --runtime "DOTNET|8.0"
+```
+
+---
+
+## 🧭 4. Linux + Nginx + Kestrel
+
+1. Publish your app:
+
+```bash
+dotnet publish -c Release -o /var/www/myapp
+```
+
+2. Create a systemd service for the app:
+
+```ini
+[Unit]
+Description=My ASP.NET Core App
+
+[Service]
+WorkingDirectory=/var/www/myapp
+ExecStart=/usr/bin/dotnet MyApp.dll
+Restart=always
+User=www-data
+
+[Install]
+WantedBy=multi-user.target
+```
+
+3. Configure **Nginx** reverse proxy:
+
+```nginx
+server {
+    listen 80;
+    server_name example.com;
+
+    location / {
+        proxy_pass         http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection keep-alive;
+        proxy_set_header   Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+---
+
+## 🐳 5. Deploy via Docker
+
+### 🧱 Create Dockerfile:
+
+```dockerfile
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY . .
+RUN dotnet publish -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "MyApp.dll"]
+```
+
+### 🚀 Build and run:
+
+```bash
+docker build -t myapp .
+docker run -d -p 8080:80 myapp
+```
+
+---
+
+## 🧪 6. Test Your Deployment
+
+* Test with browser: `http://localhost:5000` or `http://yourdomain.com`
+* Check logs: `journalctl -u myapp` or `docker logs`
+* Use reverse proxies like Nginx or Apache for production use
+
+---
+
+## ✅ Summary
+
+| Option            | Best For                                 |
+| ----------------- | ---------------------------------------- |
+| Azure App Service | Fast deployment with scaling + CI/CD     |
+| IIS on Windows    | Enterprises using Windows infrastructure |
+| Linux + Nginx     | Lightweight and flexible                 |
+| Docker            | Cloud-native and reproducible            |
+| Kubernetes        | Microservices or large-scale apps        |
+
+---
+
+# ✅ 45. How to Configure Logging in ASP.NET Core?
+
+## 🧠 What Is Logging?
+
+Logging is the practice of recording events, errors, warnings, and diagnostic messages during the execution of your application.
+
+ASP.NET Core provides a **built-in logging framework** that is:
+
+* Lightweight and extensible
+* Supports **structured logging**
+* Works with **multiple providers** (Console, Debug, File, Seq, Serilog, etc.)
+
+---
+
+## 🧱 1. Built-in Logging Providers
+
+| Provider      | Description                        |
+| ------------- | ---------------------------------- |
+| Console       | Logs to terminal/console           |
+| Debug         | Logs to Visual Studio Debug output |
+| EventSource   | Windows EventSource                |
+| EventLog      | Windows Event Log                  |
+| Azure Monitor | Cloud logging                      |
+
+> ✔️ You can also add third-party loggers like **Serilog**, **NLog**, **Seq**, etc.
+
+---
+
+## ⚙️ 2. Configure Logging in `Program.cs`
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+// Clear default providers (optional)
+builder.Logging.ClearProviders();
+
+// Add desired providers
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
+// Set minimum level globally
+builder.Logging.SetMinimumLevel(LogLevel.Information);
+```
+
+---
+
+## 📝 3. Configure Logging Levels in `appsettings.json`
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "MyAppNamespace": "Debug"
+    }
+  }
+}
+```
+
+> 📌 You can fine-tune logging per namespace or class.
+
+---
+
+## 🧑‍💻 4. Use `ILogger<T>` in Your Services/Controllers
+
+```csharp
+public class UserService
+{
+    private readonly ILogger<UserService> _logger;
+
+    public UserService(ILogger<UserService> logger)
+    {
+        _logger = logger;
+    }
+
+    public void CreateUser(User user)
+    {
+        _logger.LogInformation("Creating user: {Name}", user.Name);
+
+        try
+        {
+            // Logic
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating user");
+        }
+    }
+}
+```
+
+> ✅ Supports structured logging with `{}` placeholders.
+
+---
+
+## 🔍 5. Logging Levels
+
+| Level         | Description                       |
+| ------------- | --------------------------------- |
+| `Trace`       | Most detailed (diagnostic)        |
+| `Debug`       | Development-only info             |
+| `Information` | High-level application events     |
+| `Warning`     | Unexpected but recoverable issues |
+| `Error`       | Failed operations                 |
+| `Critical`    | System is unusable                |
+| `None`        | No logging                        |
+
+---
+
+## 🧪 6. Add Third-Party Logging (e.g. Serilog)
+
+```bash
+dotnet add package Serilog.AspNetCore
+dotnet add package Serilog.Sinks.Console
+```
+
+```csharp
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+```
+
+---
+
+## 📦 7. Example of Structured Log Output
+
+```csharp
+_logger.LogInformation("User {UserId} logged in at {Time}", user.Id, DateTime.UtcNow);
+```
+
+➡️ Output:
+
+```
+info: UserService[0]
+      User 42 logged in at 2025-06-24T14:00:00Z
+```
+
+---
+
+## ✅ Summary
+
+| Task                      | How to Do It                                 |
+| ------------------------- | -------------------------------------------- |
+| Add basic logging         | Use `ILogger<T>` and `AddConsole()`          |
+| Configure per environment | Use `appsettings.{Environment}.json`         |
+| Customize per category    | Set `LogLevel` in `appsettings.json`         |
+| Use structured logging    | Use `{placeholder}` format                   |
+| Add file/cloud providers  | Use Serilog, NLog, Seq, Application Insights |
+
+---
+
 
 
 
