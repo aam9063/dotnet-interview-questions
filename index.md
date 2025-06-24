@@ -1,5 +1,7 @@
 # 📚 Index of Interview Questions - ASP.NET Core
 
+## 🧭 Quick Navigation
+
 1. [Explain how routing works in ASP.NET Core](#-1-explain-how-routing-works-in-aspnet-core)
 2. [What is Middleware and in What Order Do They Execute?](#-2-what-is-middleware-and-in-what-order-do-they-execute)
 3. [How Can You Stop Other Middlewares from Executing?](#-3-how-can-you-stop-other-middlewares-from-executing)
@@ -22,6 +24,29 @@
 20. [How Would You Implement Log-In Functionality in ASP.NET Core?](#-20-how-would-you-implement-log-in-functionality-in-aspnet-core)
 21. [Explain How JWT Tokens Work](#-21-explain-how-jwt-tokens-work)
 22. [Explain Refresh Tokens and How They Work](#-22-explain-refresh-tokens-and-how-they-work)
+23. [How Would You Implement an Application That Allows Access to Certain Resources If a User Has Specific Permissions?](#-23-how-would-you-implement-an-application-that-allows-access-to-certain-resources-if-a-user-has-specific-permissions)
+24. [What Is `HostedService` Used For in ASP.NET Core?](#-24-what-is-hostedservice-used-for-in-aspnet-core)
+25. [Explain the Difference Between `PeriodicTimer` and `await Task.Delay()`](#-25-explain-the-difference-between-periodictimer-and-await-taskdelay)
+26. [What Is HSTS?](#-26-what-is-hsts)
+27. [How to Return a File from an API Endpoint in ASP.NET Core?](#-27-how-to-return-a-file-from-an-api-endpoint-in-aspnet-core)
+28. [How to Accept a File via an API Endpoint in ASP.NET Core?](#-28-how-to-accept-a-file-via-an-api-endpoint-in-aspnet-core)
+29. [How to Access Query String Parameters in an API Endpoint?](#-29-how-to-access-query-string-parameters-in-an-api-endpoint)
+30. [How to Get Current Logged-In User Information in ASP.NET Core?](#-30-how-to-get-current-logged-in-user-information-in-aspnet-core)
+31. [How to Inject Dependencies in Minimal APIs in ASP.NET Core?](#-31-how-to-inject-dependencies-in-minimal-apis-in-aspnet-core)
+32. [How Would You Structure Your Minimal API Endpoints?](#-32-how-would-you-structure-your-minimal-api-endpoints)
+33. [What Is Output Caching in ASP.NET Core?](#-33-what-is-output-caching-in-aspnet-core)
+34. [Difference Between `IMemoryCache` and `IDistributedCache` in ASP.NET Core](#-34-difference-between-imemorycache-and-idistributedcache-in-aspnet-core)
+35. [Explain How HybridCache / FusionCache Works](#-35-explain-how-hybridcache--fusioncache-works)
+36. [What Caching Patterns Do You Know?](#-36-what-caching-patterns-do-you-know)
+37. [What Is Rate Limiting Used For and What Types Do You Know?](#-37-what-is-rate-limiting-used-for-and-what-types-do-you-know)
+38. [How to Invalidate Data in `OutputCache` (ASP.NET Core)?](#-38-how-to-invalidate-data-in-outputcache-aspnet-core)
+39. [How to Implement API Versioning in ASP.NET Core?](#-39-how-to-implement-api-versioning-in-aspnet-core)
+40. [How to Add API Versioning Without Changing the URL?](#-40-how-to-add-api-versioning-without-changing-the-url)
+41. [What Is Swagger Used For?](#-41-what-is-swagger-used-for)
+42. [How to Add Documentation of Endpoints, Models and Fields in Swagger?](#-42-how-to-add-documentation-of-endpoints-models-and-fields-in-swagger)
+43. [How to Get a Connection String from Configuration?](#-43-how-to-get-a-connection-string-from-configuration)
+44. [How Can You Deploy an ASP.NET Core Application?](#-44-how-can-you-deploy-an-aspnet-core-application)
+45. [How to Configure Logging in ASP.NET Core?](#-45-how-to-configure-logging-in-aspnet-core)
 
 ---
 
