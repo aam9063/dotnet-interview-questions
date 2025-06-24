@@ -1,3 +1,30 @@
+# 📚 Index of Interview Questions - ASP.NET Core
+
+1. [Explain how routing works in ASP.NET Core](#-1-explain-how-routing-works-in-aspnet-core)
+2. [What is Middleware and in What Order Do They Execute?](#-2-what-is-middleware-and-in-what-order-do-they-execute)
+3. [How Can You Stop Other Middlewares from Executing?](#-3-how-can-you-stop-other-middlewares-from-executing)
+4. [What Is the Difference Between MVC and Razor Pages?](#-4-what-is-the-difference-between-mvc-and-razor-pages)
+5. [Name 3 Ways to Create Middleware in ASP.NET Core](#-5-name-3-ways-to-create-middleware-in-aspnet-core)
+6. [Explain How `appsettings.json` Configuration Layering Works](#-6-explain-how-appsettingsjson-configuration-layering-works)
+7. [What Is the Difference Between Singleton, Scoped, and Transient Services?](#-7-what-is-the-difference-between-singleton-scoped-and-transient-services)
+8. [How to Use a Scoped Service Inside a Singleton Service in ASP.NET Core?](#-8-how-to-use-a-scoped-service-inside-a-singleton-service-in-aspnet-core)
+9. [How to Execute Code When the Application Is Starting and Stopping?](#-9-how-to-execute-code-when-the-application-is-starting-and-stopping)
+10. [What Is a Background Service in ASP.NET Core?](#-10-what-is-a-background-service-in-aspnet-core)
+11. [Name a Few Ways to Read Data from `appsettings.json` Configuration](#-11-name-a-few-ways-to-read-data-from-appsettingsjson-configuration)
+12. [What Is the Options Pattern in ASP.NET Core?](#-12-what-is-the-options-pattern-in-aspnet-core)
+13. [Name the Use Cases for `IOptionsSnapshot` and `IOptionsMonitor`](#-13-name-the-use-cases-for-ioptionssnapshot-and-ioptionsmonitor)
+14. [How to Validate Configuration in ASP.NET Core?](#-14-how-to-validate-configuration-in-aspnet-core)
+15. [What Is the Difference Between DataAnnotations and FluentValidation?](#-15-what-is-the-difference-between-dataannotations-and-fluentvalidation)
+16. [What Are the Controller Filter Attributes in ASP.NET Core?](#-16-what-are-the-controller-filter-attributes-in-aspnet-core)
+17. [Why Are Minimal APIs Faster Than Controllers in ASP.NET Core?](#-17-why-are-minimal-apis-faster-than-controllers-in-aspnet-core)
+18. [How to Add Authorization to an ASP.NET Core Project?](#-18-how-to-add-authorization-to-an-aspnet-core-project)
+19. [How to Add Authorization to All Controller's Methods Except One?](#-19-how-to-add-authorization-to-all-controllers-methods-except-one)
+20. [How Would You Implement Log-In Functionality in ASP.NET Core?](#-20-how-would-you-implement-log-in-functionality-in-aspnet-core)
+21. [Explain How JWT Tokens Work](#-21-explain-how-jwt-tokens-work)
+22. [Explain Refresh Tokens and How They Work](#-22-explain-refresh-tokens-and-how-they-work)
+
+---
+
 # ✅ 1. Explain how routing works in ASP.NET Core
 
 ## 🧠 What is Routing?
@@ -174,7 +201,7 @@ app.Run();
 
 Middleware is executed **in the order it is added**. If the order is incorrect, it can break functionality.
 
-✅ For example, you must call `UseAuthentication()` **before** `UseAuthorization()` — otherwise, the user won’t be authenticated when authorization runs.
+✅ For example, you must call `UseAuthentication()` **before** `UseAuthorization()` — otherwise, the user won't be authenticated when authorization runs.
 
 ---
 
@@ -458,15 +485,15 @@ public class IndexModel : PageModel
 
 * ✅ Use **MVC** if:
 
-  * You’re building a **REST API**
+  * You're building a **REST API**
   * Your app has **complex routing**
   * You prefer **separation of concerns**
 
 * ✅ Use **Razor Pages** if:
 
-  * You’re building a **simple web UI**
+  * You're building a **simple web UI**
   * You want a **quick and clean page-based model**
-  * You’re creating **form-based pages** (CRUD)
+  * You're creating **form-based pages** (CRUD)
 
 ---
 
@@ -667,7 +694,7 @@ appsettings.Production.json
 
 ---
 
-## 🔧 How It’s Loaded in `Program.cs`
+## 🔧 How It's Loaded in `Program.cs`
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
@@ -799,7 +826,7 @@ builder.Services.AddTransient<IMyService, MyService>();
 ### ✅ Use when:
 
 * The service is **lightweight** and **stateless**.
-* You don’t need to share state at all.
+* You don't need to share state at all.
 
 ---
 
@@ -1478,7 +1505,7 @@ Each serves a different purpose depending on the **lifetime** of the service and
 
 ### ❌ Not suitable for:
 
-* Singleton services (won’t work, throws error)
+* Singleton services (won't work, throws error)
 
 ---
 
@@ -1966,7 +1993,7 @@ They offer **better performance** due to fewer abstractions and less overhead in
 
 ### 1️⃣ ✅ **Fewer Middleware Components**
 
-* Minimal APIs don’t require the **MVC middleware**, **routing metadata**, or **model binding system** that controllers use.
+* Minimal APIs don't require the **MVC middleware**, **routing metadata**, or **model binding system** that controllers use.
 * No controller discovery, no `ActionDescriptor`, no attribute routing logic.
 
 ```csharp
@@ -2030,7 +2057,7 @@ Result: **faster execution** with fewer lifecycle hooks.
 
 ## 🧪 Performance Benchmarks
 
-* Microsoft’s internal benchmarks show **Minimal APIs are up to 30–50% faster** in high-throughput scenarios.
+* Microsoft's internal benchmarks show **Minimal APIs are up to 30–50% faster** in high-throughput scenarios.
 * Especially noticeable with:
 
   * Short request/response lifecycles
@@ -2343,7 +2370,7 @@ Login functionality involves:
 3. **Generating a token or cookie**
 4. **Returning authentication response**
 
-We’ll focus on a **JWT-based login** commonly used in APIs.
+We'll focus on a **JWT-based login** commonly used in APIs.
 
 ---
 
@@ -2502,7 +2529,7 @@ fetch('/api/protected', {
 
 A **JWT (JSON Web Token)** is a compact, URL-safe token format used for **stateless authentication**.
 
-It’s digitally signed and **self-contained**, meaning it carries user information (claims) and can be **validated without querying the database**.
+It's digitally signed and **self-contained**, meaning it carries user information (claims) and can be **validated without querying the database**.
 
 ---
 
@@ -2545,7 +2572,7 @@ Contains **claims** — user info, roles, expiration, etc.:
 ### 3️⃣ Signature
 
 Ensures the token has not been tampered with.
-It’s created using:
+It's created using:
 
 ```
 HMACSHA256(base64UrlEncode(header) + "." + base64UrlEncode(payload), secret)
